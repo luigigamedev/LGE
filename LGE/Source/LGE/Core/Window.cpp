@@ -10,10 +10,12 @@ namespace LGE
 	Window::Window(const std::string& title, unsigned int width, unsigned int height)
 		: m_GlfwWindow(nullptr)
 	{
+		std::cout << "[Window] Window(){" << '\n';
+		
 		// Initialize Glfw
 		if (!glfwInit())
 		{
-			std::cout << "ERROR: Failed initializing GLFW." << std::endl;
+			std::cout << "[Window] ERROR: Failed initializing GLFW." << '\n';
 			return;
 		}
 
@@ -24,7 +26,7 @@ namespace LGE
 
 		if (!m_GlfwWindow)
 		{
-			std::cout << "ERROR: Failed creating GLFW window." << std::endl;
+			std::cout << "[Window] ERROR: Failed creating GLFW window." << '\n';
 			glfwTerminate();
 			return;
 		}
@@ -35,21 +37,25 @@ namespace LGE
 		// glad: load all OpenGL function pointers
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
-			std::cout << "ERROR: Failed to initialize GLAD" << std::endl;
+			std::cout << "[Window] ERROR: Failed to initialize GLAD" << '\n';
 			return;
 		}
 
 		glfwSwapInterval(1); // Enable vsync
 
-		std::cout << glGetString(GL_VERSION) << std::endl;
+		std::cout << "[Window] " << glGetString(GL_VERSION) << '\n';
 
 		glViewport(0, 0, width, height);
 	}
 	
 	Window::~Window()
 	{
+		std::cout << "[Window] ~Window(){" << '\n';
+
 		glfwDestroyWindow(m_GlfwWindow);
 		glfwTerminate();
+
+		std::cout << "[Window] ~Window()}" << '\n';
 	}
 
 	bool Window::ShouldClose() const

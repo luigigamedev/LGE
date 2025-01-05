@@ -10,7 +10,7 @@ private:
 public:
 	SandboxApplication()
 	{
-		std::cout << "SandboxApplication()" << std::endl;
+		std::cout << "[SandboxApplication] SandboxApplication(){" << '\n';
 
 		m_TestScene = new LGE::TestScene();
 		ActivateScene(m_TestScene);
@@ -18,9 +18,11 @@ public:
 
 	~SandboxApplication()
 	{
+		std::cout << "[SandboxApplication] ~SandboxApplication(){" << '\n';
+
 		delete m_TestScene;
-		
-		std::cout << "~SandboxApplication()}" << std::endl;
+
+		std::cout << "[SandboxApplication] ~SandboxApplication()}" << '\n';
 	}
 };
 

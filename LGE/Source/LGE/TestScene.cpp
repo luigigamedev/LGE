@@ -15,7 +15,7 @@ namespace LGE
 	TestScene::TestScene()
 		: m_BoxTexture(nullptr), m_FaceTexture(nullptr), m_BasicShaderProgram(nullptr)
 	{
-		std::cout << "TestScene()" << std::endl;
+		std::cout << "[TestScene] TestScene(){" << '\n';
 
 		// Generate the vertex array object.
 		// Bind the VAO so any subsequent vertex attribute calls from that point on will be stored 
@@ -134,11 +134,13 @@ namespace LGE
 
 	TestScene::~TestScene()
 	{
+		std::cout << "[TestScene] ~TestScene(){" << '\n';
+		
 		delete m_BoxTexture;
 		delete m_FaceTexture;
 		delete m_BasicShaderProgram;
 
-		std::cout << "~TestScene()}" << std::endl;
+		std::cout << "[TestScene] ~TestScene()}" << '\n';
 	}
 
 	void TestScene::Update(float deltaTime)
