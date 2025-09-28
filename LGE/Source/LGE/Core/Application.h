@@ -7,16 +7,18 @@ namespace LGE
 	class Scene;
 	class Window;
 
-	const unsigned int k_ScreenWidth = 1280;
-	const unsigned int k_ScreenHeight = 720;
+	constexpr unsigned int k_ScreenWidth = 1280;
+	constexpr unsigned int k_ScreenHeight = 720;
 
 	class LGE_API Application
 	{
 	private:
 		Window* m_Window;
 		Scene* m_ActiveScene;
+
 	private:
 		static Application* s_Instance;
+
 	public:
 		Application();
 		virtual ~Application();
@@ -24,7 +26,4 @@ namespace LGE
 		void Run();
 		static Application& Get() { return *s_Instance; }
 	};
-
-	// To be defined in client application
-	Application* CreateApplication();
 }

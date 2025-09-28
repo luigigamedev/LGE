@@ -2,7 +2,10 @@
 
 #ifdef LGE_PLATFORM_WINDOWS
 
-extern LGE::Application* LGE::CreateApplication();
+namespace LGE
+{
+	Application* CreateApplication();
+}
 
 int main(int argc, char** argv)
 {
