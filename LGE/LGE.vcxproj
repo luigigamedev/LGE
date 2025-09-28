@@ -102,8 +102,6 @@
     <ClInclude Include="Source\LGE\Core\Application.h" />
     <ClInclude Include="Source\LGE\Core\Core.h" />
     <ClInclude Include="Source\LGE\Core\EntryPoint.h" />
-    <ClInclude Include="Source\LGE\Math\Matrix4.h" />
-    <ClInclude Include="Source\LGE\Math\Vector3.h" />
     <ClInclude Include="Source\LGE\Scene.h" />
     <ClInclude Include="Source\LGE\Rendering\ShaderProgram.h" />
     <ClInclude Include="Source\LGE\TestScene.h" />
@@ -122,8 +120,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\LGE\Core\Application.cpp" />
-    <ClCompile Include="Source\LGE\Math\Matrix4.cpp" />
-    <ClCompile Include="Source\LGE\Math\Vector3.cpp" />
     <ClCompile Include="Source\LGE\Rendering\ShaderProgram.cpp" />
     <ClCompile Include="Source\LGE\TestScene.cpp" />
     <ClCompile Include="Source\LGE\Rendering\Texture.cpp" />

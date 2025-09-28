@@ -7,8 +7,8 @@ namespace LGE
 	class Scene;
 	class Window;
 
-	constexpr unsigned int k_ScreenWidth = 1280;
-	constexpr unsigned int k_ScreenHeight = 720;
+	constexpr unsigned int k_ScreenWidth = 800;
+	constexpr unsigned int k_ScreenHeight = 600;
 
 	class LGE_API Application
 	{

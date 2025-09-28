@@ -5,8 +5,10 @@
 #include <glad/glad.h>
 #include "stb/stb_image.h"
 
-#include "Math/Matrix4.h"
-#include "Math/Vector3.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 
@@ -119,17 +121,12 @@ namespace LGE
 		m_BasicShaderProgram->Bind();
 		m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
 		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
-		m_BasicShaderProgram->SetUniformMatrix4f("u_Matri", Matrix4::Identity());
-
-		// ----------------------------------------------------------------------------------------
-
-		Matrix4 t = Matrix4::Translation({ 1.0f, 2.0f, 3.0f });
-		Matrix4 s = Matrix4::Scaling({ 2.0f, 2.0f, 2.0f });
-		Matrix4 combined = t * s;
-
-		std::cout << combined.DebugString();
-
-		// ----------------------------------------------------------------------------------------
+		
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+		trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
+		
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Matri", trans);
 	}
 
 	TestScene::~TestScene()

@@ -12,8 +12,8 @@ namespace LGE
 		GLFWwindow* m_GlfwWindow;
 	public:
 		Window(const std::string& title = "Learn Game Engine",
-			unsigned int width = 1600,
-			unsigned int height = 900);
+			unsigned int width = 800,
+			unsigned int height = 600);
 		~Window();
 
 		GLFWwindow* GetGlfwWindow() { return m_GlfwWindow; }

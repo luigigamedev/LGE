@@ -3,8 +3,7 @@
 #include <iostream>
 
 #include <glad/glad.h>
-
-#include "Math/Matrix4.h"
+#include <glm/gtc/type_ptr.inl>
 
 namespace LGE
 {
@@ -44,9 +43,9 @@ namespace LGE
 		glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
 	}
 
-	void ShaderProgram::SetUniformMatrix4f(const std::string& name, const Matrix4& matrix)
+	void ShaderProgram::SetUniformMatrix4f(const std::string& name, const glm::mat4& matrix)
 	{
-		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix.M00);
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
 	unsigned int ShaderProgram::CreateShader(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc)
