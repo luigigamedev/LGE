@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Core/Application.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 
@@ -89,11 +90,11 @@ namespace LGE
 			out vec3 v_Color; // color from vertex shader to fragment shader
 			out vec2 v_TexCoord;
 			
-			uniform mat4 u_Matri;
+			uniform mat4 u_Matrix;
 			
 			void main()
 			{
-				gl_Position = u_Matri * vec4(a_Position, 1.0);
+				gl_Position = u_Matrix * vec4(a_Position, 1.0);
 				v_Color = a_Color;
 				v_TexCoord = a_TexCoord;
 			}
@@ -121,12 +122,10 @@ namespace LGE
 		m_BasicShaderProgram->Bind();
 		m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
 		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
-		
+
 		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-		trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
-		
-		m_BasicShaderProgram->SetUniformMatrix4f("u_Matri", trans);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", trans);
 	}
 
 	TestScene::~TestScene()
@@ -142,6 +141,11 @@ namespace LGE
 
 	void TestScene::Update(float deltaTime)
 	{
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f)); // Duplicate cuz matrix dont persist
+		trans = glm::rotate(trans, Application::Get().GetTime(), glm::vec3(0.0, 0.0, 1.0));
+		
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", trans);
 	}
 
 	void TestScene::Render()
@@ -150,7 +154,7 @@ namespace LGE
 		//m_FaceTexture->Bind(1);
 		//m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
 		//m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
-		//m_BasicShaderProgram->SetUniformMatrix4f("u_Matri", Matrix4::Identity());
+		//m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", Matrix4::Identity());
 		//m_BasicShaderProgram->Bind();
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

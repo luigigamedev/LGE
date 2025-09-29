@@ -118,4 +118,9 @@ namespace LGE
 			m_Window->Update();
 		}
 	}
+
+	float Application::GetTime() const
+	{
+		return m_Window->GetTime();
+	}
 }

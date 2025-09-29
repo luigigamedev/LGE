@@ -24,6 +24,7 @@ namespace LGE
 		virtual ~Application();
 		void ActivateScene(Scene* scene);
 		void Run();
+		float GetTime() const;
 		static Application& Get() { return *s_Instance; }
 	};
 }
