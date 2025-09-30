@@ -15,6 +15,48 @@
 
 namespace LGE
 {
+	namespace
+	{
+		// Shader
+		const std::string k_VertexShaderSrc = R"(
+			#version 330 core
+			
+			// attributes
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec3 a_Color;
+			layout(location = 2) in vec2 a_TexCoord;
+
+			out vec3 v_Color; // color from vertex shader to fragment shader
+			out vec2 v_TexCoord;
+			
+			uniform mat4 u_Matrix;
+			
+			void main()
+			{
+				gl_Position = u_Matrix * vec4(a_Position, 1.0);
+				v_Color = a_Color;
+				v_TexCoord = a_TexCoord;
+			}
+		)";
+
+		const std::string k_FragmentShaderSrc = R"(
+			#version 330 core
+			
+			out vec4 fragColor; // obligatory fragment color output
+
+			in vec3 v_Color; // color from vertex shader to fragment shader
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture0;
+			uniform sampler2D u_Texture1;
+			
+			void main()
+			{
+				fragColor = mix(texture(u_Texture0, v_TexCoord), texture(u_Texture1, v_TexCoord), 0.2);
+			}
+		)";
+	}
+	
 	TestScene::TestScene()
 		: m_BoxTexture(nullptr), m_FaceTexture(nullptr), m_BasicShaderProgram(nullptr)
 	{
@@ -67,65 +109,16 @@ namespace LGE
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		// Bind the VAO to draw
-		glBindVertexArray(vao);
-
+		
 		// Texture
 		m_BoxTexture = new Texture("Resources/container.jpg");
 		m_FaceTexture = new Texture("Resources/awesomeface.png");
 
-		m_BoxTexture->Bind(0);
-		m_FaceTexture->Bind(1);
+		// Shader Program
+		m_BasicShaderProgram = new ShaderProgram(k_VertexShaderSrc, k_FragmentShaderSrc);
 
-		// Shader
-		std::string vertexShaderSrc = R"(
-			#version 330 core
-			
-			// attributes
-			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec3 a_Color;
-			layout(location = 2) in vec2 a_TexCoord;
-
-			out vec3 v_Color; // color from vertex shader to fragment shader
-			out vec2 v_TexCoord;
-			
-			uniform mat4 u_Matrix;
-			
-			void main()
-			{
-				gl_Position = u_Matrix * vec4(a_Position, 1.0);
-				v_Color = a_Color;
-				v_TexCoord = a_TexCoord;
-			}
-		)";
-
-		std::string fragmentShaderSrc = R"(
-			#version 330 core
-			
-			out vec4 fragColor; // obligatory fragment color output
-
-			in vec3 v_Color; // color from vertex shader to fragment shader
-			in vec2 v_TexCoord;
-
-			uniform sampler2D u_Texture0;
-			uniform sampler2D u_Texture1;
-			
-			void main()
-			{
-				fragColor = mix(texture(u_Texture0, v_TexCoord), texture(u_Texture1, v_TexCoord), 0.2);
-			}
-		)";
-
-		m_BasicShaderProgram = new ShaderProgram(vertexShaderSrc, fragmentShaderSrc);
-
-		m_BasicShaderProgram->Bind();
-		m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
-		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
-
-		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", trans);
+		// Bind the VAO to draw
+		glBindVertexArray(vao); // Ideally this should be in the render function
 	}
 
 	TestScene::~TestScene()
@@ -141,22 +134,32 @@ namespace LGE
 
 	void TestScene::Update(float deltaTime)
 	{
-		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f)); // Duplicate cuz matrix dont persist
-		trans = glm::rotate(trans, Application::Get().GetTime(), glm::vec3(0.0, 0.0, 1.0));
-		
-		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", trans);
 	}
 
 	void TestScene::Render()
 	{
-		//m_BoxTexture->Bind(0);
-		//m_FaceTexture->Bind(1);
-		//m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
-		//m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
-		//m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", Matrix4::Identity());
-		//m_BasicShaderProgram->Bind();
+		// Bind the VAO to draw
+		//glBindVertexArray(m_BoxVao);
+		
+		m_BoxTexture->Bind(0);
+		m_FaceTexture->Bind(1);
+		m_BasicShaderProgram->Bind();
+		m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
+		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
 
+		glm::mat4 boxATransform = glm::mat4(1.0f);
+		boxATransform = glm::rotate(boxATransform, Application::Get().GetTime(), glm::vec3(0.0, 0.0, 1.0));
+		boxATransform = glm::translate(boxATransform, glm::vec3(0.5f, 0.0f, 0.0f));
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", boxATransform);
+		
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+		glm::mat4 boxBTransform = glm::mat4(1.0f);
+		boxBTransform = glm::translate(boxBTransform, glm::vec3(-0.5f, 0.5f, 0.0f));
+		float sin = glm::sin(Application::Get().GetTime());
+		boxBTransform = glm::scale(boxBTransform, glm::vec3(sin));
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", boxBTransform);
+		
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
 
