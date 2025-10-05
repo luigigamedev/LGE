@@ -9,7 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Core/Application.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 
@@ -23,18 +22,17 @@ namespace LGE
 			
 			// attributes
 			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec3 a_Color;
-			layout(location = 2) in vec2 a_TexCoord;
+			layout(location = 1) in vec2 a_TexCoord;
 
-			out vec3 v_Color; // color from vertex shader to fragment shader
 			out vec2 v_TexCoord;
 			
-			uniform mat4 u_Matrix;
+			uniform mat4 u_Model;
+			uniform mat4 u_View;
+			uniform mat4 u_Projection;
 			
 			void main()
 			{
-				gl_Position = u_Matrix * vec4(a_Position, 1.0);
-				v_Color = a_Color;
+				gl_Position = u_Projection * u_View * u_Model * vec4(a_Position, 1.0);
 				v_TexCoord = a_TexCoord;
 			}
 		)";
@@ -44,7 +42,6 @@ namespace LGE
 			
 			out vec4 fragColor; // obligatory fragment color output
 
-			in vec3 v_Color; // color from vertex shader to fragment shader
 			in vec2 v_TexCoord;
 
 			uniform sampler2D u_Texture0;
@@ -75,24 +72,21 @@ namespace LGE
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		float vertices[] = {
-			// positions          // colors           // texture coords
-			 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-			 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-			-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-			-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+			// positions             // texture coords
+			 0.5f,  0.5f, 0.0f,      1.0f, 1.0f,   // top right
+			 0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
+			-0.5f, -0.5f, 0.0f,      0.0f, 0.0f,   // bottom left
+			-0.5f,  0.5f, 0.0f,      0.0f, 1.0f    // top left 
 		};
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		// Layout/setup vertex attribute pointers
 		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
-		// color attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
 		// tex coord attribute
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
 		// Generate the elements buffer object.
 		// Set the buffer data on OpenGL.
@@ -118,7 +112,7 @@ namespace LGE
 		m_BasicShaderProgram = new ShaderProgram(k_VertexShaderSrc, k_FragmentShaderSrc);
 
 		// Bind the VAO to draw
-		glBindVertexArray(vao); // Ideally this should be in the render function
+		glBindVertexArray(vao); // TODO: Ideally this should be in the render function
 	}
 
 	TestScene::~TestScene()
@@ -138,27 +132,24 @@ namespace LGE
 
 	void TestScene::Render()
 	{
-		// Bind the VAO to draw
-		//glBindVertexArray(m_BoxVao);
-		
 		m_BoxTexture->Bind(0);
 		m_FaceTexture->Bind(1);
+		
 		m_BasicShaderProgram->Bind();
 		m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
 		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
 
-		glm::mat4 boxATransform = glm::mat4(1.0f);
-		boxATransform = glm::rotate(boxATransform, Application::Get().GetTime(), glm::vec3(0.0, 0.0, 1.0));
-		boxATransform = glm::translate(boxATransform, glm::vec3(0.5f, 0.0f, 0.0f));
-		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", boxATransform);
-		
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 
-		glm::mat4 boxBTransform = glm::mat4(1.0f);
-		boxBTransform = glm::translate(boxBTransform, glm::vec3(-0.5f, 0.5f, 0.0f));
-		float sin = glm::sin(Application::Get().GetTime());
-		boxBTransform = glm::scale(boxBTransform, glm::vec3(sin));
-		m_BasicShaderProgram->SetUniformMatrix4f("u_Matrix", boxBTransform);
+		glm::mat4 view = glm::mat4(1.0f);
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); 
+
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Model", model);
+		m_BasicShaderProgram->SetUniformMatrix4f("u_View", view);
+		m_BasicShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 		
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
