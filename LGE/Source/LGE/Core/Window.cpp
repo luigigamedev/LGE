@@ -41,10 +41,12 @@ namespace LGE
 			return;
 		}
 
-		glfwSwapInterval(1); // Enable vsync
-
 		std::cout << "[Window] " << glGetString(GL_VERSION) << '\n';
 
+		glfwSwapInterval(1); // Enable vsync
+
+		glEnable(GL_DEPTH_TEST);
+		
 		glViewport(0, 0, width, height);
 	}
 	

@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Core/Application.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 
@@ -58,51 +59,64 @@ namespace LGE
 		: m_BoxTexture(nullptr), m_FaceTexture(nullptr), m_BasicShaderProgram(nullptr)
 	{
 		std::cout << "[TestScene] TestScene(){" << '\n';
+		
+		float vertices[] = {
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-		// Generate the vertex array object.
-		// Bind the VAO so any subsequent vertex attribute calls from that point on will be stored 
-		// inside the VAO: vertex buffer data, elements buffer data, attributes layout.
-		unsigned int vao;
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-		// Generate the vertex buffer object.
-		// Set the buffer data on OpenGL.
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		};
+
 		unsigned int vbo;
 		glGenBuffers(1, &vbo);
+
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		float vertices[] = {
-			// positions             // texture coords
-			 0.5f,  0.5f, 0.0f,      1.0f, 1.0f,   // top right
-			 0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
-			-0.5f, -0.5f, 0.0f,      0.0f, 0.0f,   // bottom left
-			-0.5f,  0.5f, 0.0f,      0.0f, 1.0f    // top left 
-		};
+
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-		// Layout/setup vertex attribute pointers
 		// position attribute
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 		// tex coord attribute
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
-
-		// Generate the elements buffer object.
-		// Set the buffer data on OpenGL.
-		unsigned int ebo;
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		unsigned int indices[] = {
-			0, 1, 3,   // first triangle
-			1, 2, 3    // second triangle
-		};
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-		// Unbind VAO and VBO and EBO
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		
 		// Texture
 		m_BoxTexture = new Texture("Resources/container.jpg");
@@ -110,9 +124,6 @@ namespace LGE
 
 		// Shader Program
 		m_BasicShaderProgram = new ShaderProgram(k_VertexShaderSrc, k_FragmentShaderSrc);
-
-		// Bind the VAO to draw
-		glBindVertexArray(vao); // TODO: Ideally this should be in the render function
 	}
 
 	TestScene::~TestScene()
@@ -140,7 +151,7 @@ namespace LGE
 		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+		model = glm::rotate(model, Application::Get().GetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
 
 		glm::mat4 view = glm::mat4(1.0f);
 		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); 
@@ -151,7 +162,7 @@ namespace LGE
 		m_BasicShaderProgram->SetUniformMatrix4f("u_View", view);
 		m_BasicShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 		
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
 	void TestScene::ImGuiRender()
