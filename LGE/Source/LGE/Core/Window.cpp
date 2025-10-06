@@ -19,7 +19,6 @@ namespace LGE
 			return;
 		}
 
-		// Create Window
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_GlfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
