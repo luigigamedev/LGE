@@ -69,9 +69,19 @@ namespace LGE
 		return static_cast<float>(glfwGetTime());
 	}
 
-	void Window::Update()
+	void Window::PollEvents()
 	{
 		glfwPollEvents();
+
+	}
+
+	void Window::SwapBuffers()
+	{
 		glfwSwapBuffers(m_GlfwWindow);
+	}
+
+	int Window::GetKey(int keyCode)
+	{
+		return glfwGetKey(m_GlfwWindow, keyCode);
 	}
 }

@@ -25,6 +25,7 @@ namespace LGE
 		void ActivateScene(Scene* scene);
 		void Run();
 		float GetTime() const;
+		int GetKey(int keyCode) const;
 		static Application& Get() { return *s_Instance; }
 	};
 }

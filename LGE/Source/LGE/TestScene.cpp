@@ -3,6 +3,8 @@
 #include <iostream>
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "stb/stb_image.h"
 
 #include <glm/glm.hpp>
@@ -53,6 +55,11 @@ namespace LGE
 				fragColor = mix(texture(u_Texture0, v_TexCoord), texture(u_Texture1, v_TexCoord), 0.2);
 			}
 		)";
+
+		glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f,  3.0f);
+		glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+		glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
+		glm::vec3 cameraRight = glm::vec3(1.0f,  0.0f, 0.0f);
 	}
 	
 	TestScene::TestScene()
@@ -137,8 +144,29 @@ namespace LGE
 
 	void TestScene::Update(float deltaTime)
 	{
-	}
+		float cameraSpeed = 2.5f * deltaTime;
+		
+		if (Application::Get().GetKey(GLFW_KEY_W) == 1)
+		{
+			cameraPos += cameraSpeed * cameraFront;
+		}
 
+		if (Application::Get().GetKey(GLFW_KEY_S) == 1)
+		{
+			cameraPos -= cameraSpeed * cameraFront;
+		}
+
+		if (Application::Get().GetKey(GLFW_KEY_A) == 1)
+		{
+			cameraPos -= cameraRight * cameraSpeed;
+		}
+
+		if (Application::Get().GetKey(GLFW_KEY_D) == 1)
+		{
+			cameraPos += cameraRight * cameraSpeed;
+		}
+	}
+	
 	void TestScene::Render()
 	{
 		m_BoxTexture->Bind(0);
@@ -147,35 +175,32 @@ namespace LGE
 		m_BasicShaderProgram->Bind();
 		m_BasicShaderProgram->SetUniform1i("u_Texture0", 0);
 		m_BasicShaderProgram->SetUniform1i("u_Texture1", 1);
-		
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); 
 
-		m_BasicShaderProgram->SetUniformMatrix4f("u_View", view);
+		// glm::vec4 col0(cameraRight.x, cameraUp.x, cameraDirection.x, 0.0f);
+		// glm::vec4 col1(cameraRight.y, cameraUp.y, cameraDirection.y, 0.0f);
+		// glm::vec4 col2(cameraRight.z, cameraUp.z, cameraDirection.z, 0.0f);
+		// glm::vec4 col3(0.0f, 0.0f, 0.0f, 1.0f);
+		// glm::mat4 lookAt = glm::mat4(col0, col1, col2, col3);
+		// lookAt = glm::translate(lookAt, glm::vec3(-cameraPosition.x, -cameraPosition.y, -cameraPosition.z));
+
+		glm::mat4 lookAt = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+		m_BasicShaderProgram->SetUniformMatrix4f("u_View", lookAt);
 
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		m_BasicShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 
 		glm::vec3 cubePositions[] = {
-			glm::vec3( 0.0f,  0.0f,  0.0f), 
-			glm::vec3( 2.0f,  5.0f, -15.0f), 
-			glm::vec3(-1.5f, -2.2f, -2.5f),  
-			glm::vec3(-3.8f, -2.0f, -12.3f),  
-			glm::vec3( 2.4f, -0.4f, -3.5f),  
-			glm::vec3(-1.7f,  3.0f, -7.5f),  
-			glm::vec3( 1.3f, -2.0f, -2.5f),  
-			glm::vec3( 1.5f,  2.0f, -2.5f), 
-			glm::vec3( 1.5f,  0.2f, -1.5f), 
-			glm::vec3(-1.3f,  1.0f, -1.5f)  
+			glm::vec3(0.0f, 0.0f, 0.0f), 
+			glm::vec3(2.0f, 1.0f, -2.0f), 
+			glm::vec3(-2.0f, 1.0f, -4.0f)
 		};
 
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < 3; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
 			m_BasicShaderProgram->SetUniformMatrix4f("u_Model", model);
 			

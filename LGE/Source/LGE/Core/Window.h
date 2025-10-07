@@ -23,6 +23,10 @@ namespace LGE
 		float GetTime() const;
 
 		// Called at the end of the Application run loop
-		void Update();
+		void PollEvents();
+
+		void SwapBuffers();
+
+		int GetKey(int keyCode);
 	};
 }
