@@ -10,6 +10,8 @@ namespace LGE
 	{
 	private:
 		GLFWwindow* m_GlfwWindow;
+		double m_MouseX;
+		double m_MouseY;
 	public:
 		Window(const std::string& title = "Learn Game Engine",
 			unsigned int width = 800,
@@ -22,11 +24,16 @@ namespace LGE
 
 		float GetTime() const;
 
+		void ProcessInput();
+
 		// Called at the end of the Application run loop
 		void PollEvents();
 
 		void SwapBuffers();
 
 		int GetKey(int keyCode);
+
+		double GetMouseX() const;
+		double GetMouseY() const;
 	};
 }

@@ -26,6 +26,8 @@ namespace LGE
 		void Run();
 		float GetTime() const;
 		int GetKey(int keyCode) const;
+		double GetMouseX() const;
+		double GetMouseY() const;
 		static Application& Get() { return *s_Instance; }
 	};
 }

@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h> // Included here only for input. Ideally all glfw should be handled only by Window class
 
 #include "stb/stb_image.h"
 
@@ -56,10 +56,15 @@ namespace LGE
 			}
 		)";
 
-		glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f,  3.0f);
-		glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-		glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
-		glm::vec3 cameraRight = glm::vec3(1.0f,  0.0f, 0.0f);
+		glm::vec3 s_CameraPos = glm::vec3(0.0f, 0.0f,  3.0f);
+		glm::vec3 s_CameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+		glm::vec3 s_CameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
+		glm::vec3 s_CameraRight = glm::vec3(1.0f,  0.0f, 0.0f);
+		float s_CameraYaw = -90.0f;
+
+		bool s_FirstMouse = true;
+		float s_LastMouseX;
+		float s_LastMouseY;
 	}
 	
 	TestScene::TestScene()
@@ -144,26 +149,53 @@ namespace LGE
 
 	void TestScene::Update(float deltaTime)
 	{
+		double newMouseX = Application::Get().GetMouseX();
+		double newMouseY = Application::Get().GetMouseY();
+
+		if (s_FirstMouse)
+		{
+			s_LastMouseX = newMouseX;
+			s_LastMouseY = newMouseY;
+			
+			s_FirstMouse = false;
+		}
+		
+		float mouseDeltaX = newMouseX - s_LastMouseX;
+		float mouseDeltaY = newMouseY - s_LastMouseY;
+		s_LastMouseX = newMouseX;
+		s_LastMouseY = newMouseY;
+
+		const float sensitivity = 0.1f;
+
+		s_CameraYaw += mouseDeltaX * sensitivity;
+
+		s_CameraFront.x = cos(glm::radians(s_CameraYaw));
+		s_CameraFront.y = 0.0f;
+		s_CameraFront.z = sin(glm::radians(s_CameraYaw));
+		s_CameraFront = glm::normalize(s_CameraFront);
+
+		s_CameraRight = glm::cross(s_CameraFront, s_CameraUp);
+		
 		float cameraSpeed = 2.5f * deltaTime;
 		
 		if (Application::Get().GetKey(GLFW_KEY_W) == 1)
 		{
-			cameraPos += cameraSpeed * cameraFront;
+			s_CameraPos += cameraSpeed * s_CameraFront;
 		}
 
 		if (Application::Get().GetKey(GLFW_KEY_S) == 1)
 		{
-			cameraPos -= cameraSpeed * cameraFront;
+			s_CameraPos -= cameraSpeed * s_CameraFront;
 		}
 
 		if (Application::Get().GetKey(GLFW_KEY_A) == 1)
 		{
-			cameraPos -= cameraRight * cameraSpeed;
+			s_CameraPos -= s_CameraRight * cameraSpeed;
 		}
 
 		if (Application::Get().GetKey(GLFW_KEY_D) == 1)
 		{
-			cameraPos += cameraRight * cameraSpeed;
+			s_CameraPos += s_CameraRight * cameraSpeed;
 		}
 	}
 	
@@ -183,7 +215,7 @@ namespace LGE
 		// glm::mat4 lookAt = glm::mat4(col0, col1, col2, col3);
 		// lookAt = glm::translate(lookAt, glm::vec3(-cameraPosition.x, -cameraPosition.y, -cameraPosition.z));
 
-		glm::mat4 lookAt = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		glm::mat4 lookAt = glm::lookAt(s_CameraPos, s_CameraPos + s_CameraFront, s_CameraUp);
 
 		m_BasicShaderProgram->SetUniformMatrix4f("u_View", lookAt);
 
@@ -206,9 +238,5 @@ namespace LGE
 			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-	}
-
-	void TestScene::ImGuiRender()
-	{
 	}
 }

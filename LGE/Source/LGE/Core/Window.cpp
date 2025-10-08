@@ -30,9 +30,14 @@ namespace LGE
 			return;
 		}
 
-		// Initialize Gl Context
 		glfwMakeContextCurrent(m_GlfwWindow);
 
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		glfwSetWindowPos(m_GlfwWindow, (mode->width - width) / 2, (mode->height - height) / 2);
+		
+		// Hides and grabs the cursor, providing virtual and unlimited cursor movement
+		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		
 		// glad: load all OpenGL function pointers
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
@@ -42,8 +47,7 @@ namespace LGE
 
 		std::cout << "[Window] " << glGetString(GL_VERSION) << '\n';
 
-		glfwSwapInterval(1); // Enable vsync
-
+		// Configure global opengl state
 		glEnable(GL_DEPTH_TEST);
 		
 		glViewport(0, 0, width, height);
@@ -69,10 +73,19 @@ namespace LGE
 		return static_cast<float>(glfwGetTime());
 	}
 
+	void Window::ProcessInput()
+	{
+		glfwGetCursorPos(m_GlfwWindow, &m_MouseX, &m_MouseY);
+
+		if (GetKey(GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		{
+			glfwSetWindowShouldClose(m_GlfwWindow, true);
+		}
+	}
+
 	void Window::PollEvents()
 	{
 		glfwPollEvents();
-
 	}
 
 	void Window::SwapBuffers()
@@ -83,5 +96,15 @@ namespace LGE
 	int Window::GetKey(int keyCode)
 	{
 		return glfwGetKey(m_GlfwWindow, keyCode);
+	}
+
+	double Window::GetMouseX() const
+	{
+		return m_MouseX;
+	}
+
+	double Window::GetMouseY() const
+	{
+		return m_MouseY;
 	}
 }

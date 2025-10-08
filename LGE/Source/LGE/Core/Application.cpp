@@ -3,9 +3,6 @@
 #include <iostream>
 
 #include <glad/glad.h>
-// #include "imgui/imgui.h"
-// #include "imgui/imgui_impl_glfw.h"
-// #include "imgui/imgui_impl_opengl3.h"
 
 #include "Scene.h"
 #include "Window.h"
@@ -44,47 +41,31 @@ namespace LGE
 	{
 		float time = m_Window->GetTime();
 
-		// ImGui ----------------------------------------------------------------------------------
-		// ImGui::CreateContext();
-		// ImGuiIO& imGuiIo = ImGui::GetIO();
-		// (void)imGuiIo;
-		// imGuiIo.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-		// imGuiIo.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-		// ImGui::StyleColorsDark();
-		// // Setup Platform/Renderer backends
-		// ImGui_ImplGlfw_InitForOpenGL(m_Window->GetGlfwWindow(), true);
-		// const char* glsl_version = "#version 130";
-		// ImGui_ImplOpenGL3_Init(glsl_version);
-		// // Our state
-		// bool show_demo_window = true;
-		// bool show_another_window = false;
-		// ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-		// ----------------------------------------------------------------------------------------
-
 		while (!m_Window->ShouldClose())
 		{
+			// Frame time logic
 			float nowTime = m_Window->GetTime();
 			float deltaTime = nowTime - time;
 			time = nowTime;
+			
+			m_Window->ProcessInput();
 
-			// Logic/Simulation update
+			// Simulation update
 			if (m_ActiveScene != nullptr)
 			{
 				m_ActiveScene->Update(deltaTime);
 			}
 
-			// Render here 
+			// Render 
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // LearnOpenGL example color
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			if (m_ActiveScene != nullptr)
 			{
 				m_ActiveScene->Render();
-
-				// m_ActiveScene->ImGuiRender();
 			}
 
-			// Window swap buffers (vsync) and poll events
+			// Window swap buffers and poll events
 			m_Window->SwapBuffers();
 			m_Window->PollEvents();
 		}
@@ -98,5 +79,15 @@ namespace LGE
 	int Application::GetKey(int keyCode) const
 	{
 		return m_Window->GetKey(keyCode);
+	}
+
+	double Application::GetMouseX() const
+	{
+		return m_Window->GetMouseX();
+	}
+
+	double Application::GetMouseY() const
+	{
+		return m_Window->GetMouseY();
 	}
 }
