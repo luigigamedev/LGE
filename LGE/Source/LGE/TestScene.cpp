@@ -5,9 +5,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h> // Included here only for input. Ideally all glfw should be handled only by Window class
 
-#include "stb/stb_image.h"
-
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -56,6 +53,16 @@ namespace LGE
 			}
 		)";
 
+		constexpr float k_QuadVerts[] = {
+			// positions             // texture coords
+			0.5f,  0.5f, 0.0f,      1.0f, 1.0f,   // top right
+			0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
+		   -0.5f,  0.5f, 0.0f,      0.0f, 1.0f,   // top left 
+			0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
+		   -0.5f, -0.5f, 0.0f,      0.0f, 0.0f,   // bottom left
+		   -0.5f,  0.5f, 0.0f,      0.0f, 1.0f   // top left 
+		};
+
 		glm::vec3 s_CameraPos = glm::vec3(0.0f, 0.0f,  3.0f);
 		glm::vec3 s_CameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 		glm::vec3 s_CameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
@@ -68,11 +75,10 @@ namespace LGE
 	}
 	
 	TestScene::TestScene()
-		: m_BoxTexture(nullptr), m_FaceTexture(nullptr), m_BasicShaderProgram(nullptr)
 	{
 		std::cout << "[TestScene] TestScene(){" << '\n';
-		
-		float vertices[] = {
+
+		constexpr float vertices[] = {
 			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -139,7 +145,7 @@ namespace LGE
 	TestScene::~TestScene()
 	{
 		std::cout << "[TestScene] ~TestScene(){" << '\n';
-		
+
 		delete m_BoxTexture;
 		delete m_FaceTexture;
 		delete m_BasicShaderProgram;
@@ -147,10 +153,10 @@ namespace LGE
 		std::cout << "[TestScene] ~TestScene()}" << '\n';
 	}
 
-	void TestScene::Update(float deltaTime)
+	void TestScene::Update(const float deltaTime)
 	{
-		double newMouseX = Application::Get().GetMouseX();
-		double newMouseY = Application::Get().GetMouseY();
+		const float newMouseX = static_cast<float>(Application::Get().GetMouseX());
+		const float newMouseY = static_cast<float>(Application::Get().GetMouseY());
 
 		if (s_FirstMouse)
 		{
@@ -165,7 +171,7 @@ namespace LGE
 		s_LastMouseX = newMouseX;
 		s_LastMouseY = newMouseY;
 
-		const float sensitivity = 0.1f;
+		constexpr float sensitivity = 0.1f;
 
 		s_CameraYaw += mouseDeltaX * sensitivity;
 

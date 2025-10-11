@@ -16,7 +16,7 @@ public:
 		ActivateScene(m_TestScene);
 	}
 
-	~SandboxApplication()
+	~SandboxApplication() override
 	{
 		std::cout << "[SandboxApplication] ~SandboxApplication(){" << '\n';
 

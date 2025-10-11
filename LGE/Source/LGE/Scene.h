@@ -7,8 +7,9 @@ namespace LGE
 	class LGE_API Scene
 	{
 	public:
-		Scene() {}
-		virtual ~Scene() {}
+		Scene() = default;
+		virtual ~Scene() = default;
+
 	public:
 		virtual void Update(float deltaTime) = 0;
 		virtual void Render() = 0;
