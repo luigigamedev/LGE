@@ -9,7 +9,7 @@ namespace LGE
 	class Window 
 	{
 	private:
-		GLFWwindow* m_GlfwWindow;
+		GLFWwindow* m_GlfwWindow = nullptr;
 		double m_MouseX;
 		double m_MouseY;
 	public:

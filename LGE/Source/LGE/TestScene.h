@@ -18,10 +18,26 @@ namespace LGE
 	private:
 		Texture* m_BoxTexture = nullptr;
 		Texture* m_FaceTexture = nullptr;
-		ShaderProgram* m_BasicShaderProgram = nullptr;
-		glm::mat4 m_QuadMat;
+		Texture* m_StoneTexture = nullptr;
+		Texture* m_SmoothStoneTexture = nullptr;
+		Texture* m_DirtTexture = nullptr;
+		ShaderProgram* m_UnlitTextureShaderProgram = nullptr;
+		glm::vec3 m_CameraPos;
+		float m_CameraYaw;
+		float m_CameraPitch;
+		glm::vec3 m_CameraForward;
+		unsigned int m_QuadVbo;
+		unsigned int m_CubeVbo;
+		glm::mat4 m_GroundModel;
+		glm::mat4 m_DirtBlockModel;
+		bool m_FirstMouse = true;
+		float m_LastMouseX;
+		float m_LastMouseY;
 	public:
-		virtual void Update(float deltaTime) override;
+		virtual void Update(const float deltaTime) override;
+		void MoveFlyCamera(const glm::vec2 moveInput, const float deltaTime);
+		void MoveFpsCamera(const glm::vec2 moveInput, const float deltaTime);
+		glm::mat4 ManuallyCreateCameraViewMatrix() const;
 		virtual void Render() override;
 	};
 }

@@ -8,7 +8,6 @@
 namespace LGE 
 {
 	Window::Window(const std::string& title, unsigned int width, unsigned int height)
-		: m_GlfwWindow(nullptr)
 	{
 		std::cout << "[Window] Window(){" << '\n';
 		
@@ -49,6 +48,9 @@ namespace LGE
 
 		// Configure global opengl state
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW); // Defines what counts as a front face, counter-clockwise vertex order (default)
 		
 		glViewport(0, 0, width, height);
 	}
