@@ -9,8 +9,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Core/Application.h"
+#include "Rendering/BufferLayout.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
+#include "Rendering/VertexBuffer.h"
 #include "Shaders/UnlitTextureShader.h"
 
 namespace LGE
@@ -100,14 +102,15 @@ namespace LGE
 		m_DirtBlockModel = glm::translate(m_DirtBlockModel, glm::vec3(0.5f, 0.5f, -5.5f));
 
 		// Quad Mesh Vertex Data
-		glGenBuffers(1, &m_QuadVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_QuadVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(k_QuadVerts), k_QuadVerts, GL_STATIC_DRAW);
+		m_QuadVb = new VertexBuffer(k_QuadVerts, sizeof(k_QuadVerts));
 
 		// Cube Mesh Vertex Data
-		glGenBuffers(1, &m_CubeVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_CubeVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(k_CubeVerts), k_CubeVerts, GL_STATIC_DRAW);
+		m_CubeVb = new VertexBuffer(k_CubeVerts, sizeof(k_CubeVerts));
+
+		// Layout
+		m_CommonBufferLayout = new BufferLayout();
+		m_CommonBufferLayout->PushFloat3(); // position attribute
+		m_CommonBufferLayout->PushFloat2(); // tex coord attribute
 		
 		// Textures
 		m_BoxTexture = new Texture("Resources/container.jpg", false);
@@ -127,7 +130,10 @@ namespace LGE
 	{
 		std::cout << "[TestScene] ~TestScene(){" << '\n';
 
-		glDeleteBuffers(1, &m_QuadVbo);
+		delete m_QuadVb;
+		delete m_CubeVb;
+
+		delete m_CommonBufferLayout;
 		
 		delete m_BoxTexture;
 		delete m_FaceTexture;
@@ -289,14 +295,8 @@ namespace LGE
 		m_UnlitTextureShaderProgram->SetUniform1i("u_Texture", 0);
 		m_UnlitTextureShaderProgram->SetUniform2f("u_Tiling", 32.0f, 32.0f);
 
-		// Bind quad mesh and layout attributes
-		glBindBuffer(GL_ARRAY_BUFFER, m_QuadVbo);
-		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		// tex coord attribute
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		m_QuadVb->Bind();
+		m_CommonBufferLayout->Attrib();
 
 		m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_Model", m_GroundModel);
 
@@ -307,11 +307,8 @@ namespace LGE
 		m_UnlitTextureShaderProgram->SetUniform1i("u_Texture", 0);
 		m_UnlitTextureShaderProgram->SetUniform2f("u_Tiling", 1.0f, 1.0f);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_CubeVbo);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		m_CubeVb->Bind();
+		m_CommonBufferLayout->Attrib();
 
 		m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_Model", m_DirtBlockModel);
 

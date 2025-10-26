@@ -7,8 +7,10 @@
 
 namespace LGE
 {
-	class Texture;
+	class BufferLayout;
 	class ShaderProgram;
+	class Texture;
+	class VertexBuffer;
 	
 	class LGE_API TestScene : public Scene
 	{
@@ -26,8 +28,9 @@ namespace LGE
 		float m_CameraYaw;
 		float m_CameraPitch;
 		glm::vec3 m_CameraForward;
-		unsigned int m_QuadVbo;
-		unsigned int m_CubeVbo;
+		VertexBuffer* m_QuadVb = nullptr;
+		VertexBuffer* m_CubeVb = nullptr;
+		BufferLayout* m_CommonBufferLayout = nullptr;
 		glm::mat4 m_GroundModel;
 		glm::mat4 m_DirtBlockModel;
 		bool m_FirstMouse = true;
