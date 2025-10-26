@@ -10,6 +10,7 @@
 
 #include "Core/Application.h"
 #include "Rendering/BufferLayout.h"
+#include "Rendering/Meshes.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
@@ -17,131 +18,58 @@
 
 namespace LGE
 {
-	namespace
-	{
-		constexpr float k_QuadVerts[] = {
-			// positions             // texture coords
-			0.5f,  0.5f, 0.0f,      1.0f, 1.0f,   // top right
-		   -0.5f,  0.5f, 0.0f,      0.0f, 1.0f,   // top left 
-			0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
-			0.5f, -0.5f, 0.0f,      1.0f, 0.0f,   // bottom right
-		   -0.5f,  0.5f, 0.0f,      0.0f, 1.0f,   // top left 
-		   -0.5f, -0.5f, 0.0f,      0.0f, 0.0f,   // bottom left
-		};
-
-		constexpr float k_CubeVerts[] = {
-			// positions            // texture coords
-
-			// Front face (+Z)
-			-0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-			 0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-			 0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-			-0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
-			-0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-
-			// Back face (-Z)
-			 0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-			-0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-			-0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-			-0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-
-			// Left face (-X)
-			-0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-			-0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-			-0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-			-0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-			-0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-
-			// Right face (+X)
-			 0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-			 0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-			 0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-			 0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
-			 0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-
-			// Top face (+Y)
-			-0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
-			 0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-			-0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
-			-0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
-
-			// Bottom face (-Y)
-			-0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-			 0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-			 0.5f, -0.5f,  0.5f,   1.0f, 1.0f,
-			 0.5f, -0.5f,  0.5f,   1.0f, 1.0f,
-			-0.5f, -0.5f,  0.5f,   0.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f,   0.0f, 0.0f
-		};
-	}
-	
 	TestScene::TestScene()
 	{
 		std::cout << "[TestScene] TestScene(){" << '\n';
 
-		// Camera Object
-		m_CameraPos = glm::vec3(0.0f, 1.7f,  0.0f);
-		m_CameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
-		m_CameraYaw = -90.0f; // Should be initialized from camera forward
-		m_CameraPitch = 0.0f;
-
-		// Ground Object
-		m_GroundModel = glm::mat4(1.0f);
-		m_GroundModel = glm::rotate(m_GroundModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		m_GroundModel = glm::scale(m_GroundModel, glm::vec3(32.0f));
-
-		// Dirt Block Object
-		m_DirtBlockModel = glm::mat4(1.0f);
-		m_DirtBlockModel = glm::translate(m_DirtBlockModel, glm::vec3(0.5f, 0.5f, -5.5f));
-
-		// Quad Mesh Vertex Data
-		m_QuadVb = new VertexBuffer(k_QuadVerts, sizeof(k_QuadVerts));
-
-		// Cube Mesh Vertex Data
-		m_CubeVb = new VertexBuffer(k_CubeVerts, sizeof(k_CubeVerts));
-
-		// Layout
-		m_CommonBufferLayout = new BufferLayout();
-		m_CommonBufferLayout->PushFloat3(); // position attribute
-		m_CommonBufferLayout->PushFloat2(); // tex coord attribute
-		
-		// Textures
+		// LOAD RESOURCES ----------------------------------------------------------------------------------------------
 		m_BoxTexture = new Texture("Resources/container.jpg", false);
 		m_FaceTexture = new Texture("Resources/awesomeface.png", false);
 		m_StoneTexture = new Texture("Resources/Textures/Minecraft/stone.jpg", true);
 		m_SmoothStoneTexture = new Texture("Resources/Textures/Minecraft/smooth-stone.jpg", true);
 		m_DirtTexture = new Texture("Resources/Textures/Minecraft/dirt.jpg", true);
 
-		// Shader Program
 		m_UnlitTextureShaderProgram = new ShaderProgram(Shaders::UnlitTexture::VERTEX, Shaders::UnlitTexture::FRAGMENT);
 
-		// Clear bindings before start rendering
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// MESHES ------------------------------------------------------------------------------------------------------
+		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
+		m_CubeVb = new VertexBuffer(Meshes::CUBE, sizeof(Meshes::CUBE));
+
+		m_CommonBufferLayout = new BufferLayout();
+		m_CommonBufferLayout->PushFloat3(); // position attribute
+		m_CommonBufferLayout->PushFloat2(); // tex coord attribute
+		
+		// CAMERA ------------------------------------------------------------------------------------------------------
+		m_CameraPos = glm::vec3(0.0f, 1.7f,  0.0f);
+		m_CameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
+		m_CameraYaw = -90.0f; // Should be initialized from camera forward
+		m_CameraPitch = 0.0f;
+
+		// -------------------------------------------------------------------------------------------------------------
+		m_GroundModel = glm::mat4(1.0f);
+		m_GroundModel = glm::rotate(m_GroundModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		m_GroundModel = glm::scale(m_GroundModel, glm::vec3(32.0f));
+
+		m_DirtBlockModel = glm::mat4(1.0f);
+		m_DirtBlockModel = glm::translate(m_DirtBlockModel, glm::vec3(0.5f, 0.5f, -5.5f));
+
 	}
 
 	TestScene::~TestScene()
 	{
 		std::cout << "[TestScene] ~TestScene(){" << '\n';
 
-		delete m_QuadVb;
-		delete m_CubeVb;
-
-		delete m_CommonBufferLayout;
-		
 		delete m_BoxTexture;
 		delete m_FaceTexture;
 		delete m_StoneTexture;
 		delete m_SmoothStoneTexture;
 		delete m_DirtTexture;
-		
+
 		delete m_UnlitTextureShaderProgram;
+
+		delete m_QuadVb;
+		delete m_CubeVb;
+		delete m_CommonBufferLayout;
 
 		std::cout << "[TestScene] ~TestScene()}" << '\n';
 	}

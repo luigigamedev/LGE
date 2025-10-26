@@ -101,6 +101,7 @@
     <ClInclude Include="Source\LGE\Core\Core.h" />
     <ClInclude Include="Source\LGE\Core\EntryPoint.h" />
     <ClInclude Include="Source\LGE\Rendering\BufferLayout.h" />
+    <ClInclude Include="Source\LGE\Rendering\Meshes.h" />
     <ClInclude Include="Source\LGE\Rendering\VertexBuffer.h" />
     <ClInclude Include="Source\LGE\Scene.h" />
     <ClInclude Include="Source\LGE\Rendering\ShaderProgram.h" />
