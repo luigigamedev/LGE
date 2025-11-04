@@ -43,6 +43,11 @@ namespace LGE
 		glUniform2f(GetUniformLocation(name), v0, v1);
 	}
 
+	void ShaderProgram::SetUniform3f(const std::string& name, float v0, float v1, float v2)
+	{
+		glUniform3f(GetUniformLocation(name), v0, v1, v2);
+	}
+
 	void ShaderProgram::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 	{
 		glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);

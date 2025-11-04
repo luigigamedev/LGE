@@ -19,20 +19,17 @@ namespace LGE
 		~TestScene() override;
 	private:
 		// Textures
-		Texture* m_BoxTexture = nullptr;
-		Texture* m_FaceTexture = nullptr;
-		Texture* m_StoneTexture = nullptr;
 		Texture* m_SmoothStoneTexture = nullptr;
-		Texture* m_DirtTexture = nullptr;
-
+		
 		// Shaders
 		ShaderProgram* m_UnlitTextureShaderProgram = nullptr;
+		ShaderProgram* m_UnlitColorShaderProgram = nullptr;
 
 		// Vertex
 		VertexBuffer* m_QuadVb = nullptr;
 		VertexBuffer* m_CubeVb = nullptr;
-		BufferLayout* m_CommonBufferLayout = nullptr;
-
+		BufferLayout* m_BufferLayout = nullptr;
+		
 		// Camera
 		glm::vec3 m_CameraPos;
 		float m_CameraYaw;
@@ -46,12 +43,13 @@ namespace LGE
 
 		// Transforms
 		glm::mat4 m_GroundModel;
-		glm::mat4 m_DirtBlockModel;
+		glm::mat4 m_LightCubeModel;
+		glm::mat4 m_CubeModel;
 	public:
 		virtual void Update(const float deltaTime) override;
 		void MoveFlyCamera(const glm::vec2 moveInput, const float deltaTime);
 		void MoveFpsCamera(const glm::vec2 moveInput, const float deltaTime);
-		glm::mat4 ManuallyCreateCameraViewMatrix() const;
 		virtual void Render() override;
+		glm::mat4 BuildCameraViewMatrix() const;
 	};
 }

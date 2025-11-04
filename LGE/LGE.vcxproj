@@ -105,6 +105,7 @@
     <ClInclude Include="Source\LGE\Rendering\VertexBuffer.h" />
     <ClInclude Include="Source\LGE\Scene.h" />
     <ClInclude Include="Source\LGE\Rendering\ShaderProgram.h" />
+    <ClInclude Include="Source\LGE\Shaders\UnlitColorShader.h" />
     <ClInclude Include="Source\LGE\Shaders\UnlitTextureShader.h" />
     <ClInclude Include="Source\LGE\TestScene.h" />
     <ClInclude Include="Source\LGE\Rendering\Texture.h" />
