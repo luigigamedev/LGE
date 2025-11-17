@@ -24,6 +24,7 @@ namespace LGE
 		// Shaders
 		ShaderProgram* m_UnlitTextureShaderProgram = nullptr;
 		ShaderProgram* m_UnlitColorShaderProgram = nullptr;
+		ShaderProgram* m_LitColorShaderProgram = nullptr;
 
 		// Vertex
 		VertexBuffer* m_QuadVb = nullptr;

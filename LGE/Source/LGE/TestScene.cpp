@@ -14,6 +14,7 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
+#include "Shaders/LitColorShader.h"
 #include "Shaders/UnlitTextureShader.h"
 #include "Shaders/UnlitColorShader.h"
 
@@ -28,7 +29,8 @@ namespace LGE
 
 		m_UnlitTextureShaderProgram = new ShaderProgram(Shaders::UnlitTexture::VERTEX, Shaders::UnlitTexture::FRAGMENT);
 		m_UnlitColorShaderProgram = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
-
+		m_LitColorShaderProgram = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT);
+		
 		// MESHES ------------------------------------------------------------------------------------------------------
 		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
 
@@ -64,6 +66,7 @@ namespace LGE
 		
 		delete m_UnlitTextureShaderProgram;
 		delete m_UnlitColorShaderProgram;
+		delete m_LitColorShaderProgram;
 
 		delete m_QuadVb;
 		delete m_CubeVb;
@@ -186,15 +189,17 @@ namespace LGE
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		// Render Cube -------------------------------------------------------------------------------------------------
-		m_UnlitColorShaderProgram->Bind();
-		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
-		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
-		m_UnlitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 0.5f, 0.31f);
+		m_LitColorShaderProgram->Bind();
+		m_LitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
+		m_LitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
+		m_LitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 0.5f, 0.31f);
+		m_LitColorShaderProgram->SetUniform1f("u_AmbientStrength", 0.1f);
+		m_LitColorShaderProgram->SetUniform3f("u_AmbientColor", 1.0f, 1.0f, 1.0f);
 
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
 		
-		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_Model", m_CubeModel);
+		m_LitColorShaderProgram->SetUniformMatrix4f("u_Model", m_CubeModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
