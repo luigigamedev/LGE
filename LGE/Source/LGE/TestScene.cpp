@@ -40,6 +40,11 @@ namespace LGE
 		m_BufferLayout->PushFloat3(); // position attribute
 		m_BufferLayout->PushFloat2(); // tex coord attribute
 		
+		m_CubeBufferLayout = new BufferLayout();
+		m_CubeBufferLayout->PushFloat3(); // position attribute
+		m_CubeBufferLayout->PushFloat2(); // tex coord attribute
+		m_CubeBufferLayout->PushFloat3(); // normal attribute
+
 		// CAMERA ------------------------------------------------------------------------------------------------------
 		m_CameraPos = glm::vec3(0.0f, 1.7f,  0.0f);
 		m_CameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -71,6 +76,7 @@ namespace LGE
 		delete m_QuadVb;
 		delete m_CubeVb;
 		delete m_BufferLayout;
+		delete m_CubeBufferLayout;
 
 		std::cout << "[TestScene] ~TestScene()}" << '\n';
 	}
@@ -182,7 +188,7 @@ namespace LGE
 		m_UnlitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 1.0f, 1.0f);
 
 		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
+		m_CubeBufferLayout->Attrib();
 		
 		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_Model", m_LightCubeModel);
 
@@ -193,11 +199,12 @@ namespace LGE
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 		m_LitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 0.5f, 0.31f);
-		m_LitColorShaderProgram->SetUniform1f("u_AmbientStrength", 0.1f);
+		m_LitColorShaderProgram->SetUniform1f("u_AmbientStrength", 0.2f);
 		m_LitColorShaderProgram->SetUniform3f("u_AmbientColor", 1.0f, 1.0f, 1.0f);
+		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightPos", 1.2f, 1.0f, 2.0f);
 
 		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
+		m_CubeBufferLayout->Attrib();
 		
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_Model", m_CubeModel);
 

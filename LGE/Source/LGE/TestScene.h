@@ -30,6 +30,7 @@ namespace LGE
 		VertexBuffer* m_QuadVb = nullptr;
 		VertexBuffer* m_CubeVb = nullptr;
 		BufferLayout* m_BufferLayout = nullptr;
+		BufferLayout* m_CubeBufferLayout = nullptr;
 		
 		// Camera
 		glm::vec3 m_CameraPos;
