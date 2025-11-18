@@ -36,6 +36,7 @@ namespace LGE::Shaders::LitColor
 		uniform float u_AmbientStrength;
 		uniform vec3 u_AmbientColor;
 		uniform vec3 u_DiffuseLightPos;
+		uniform vec3 u_DiffuseLightColor;
 				
 		void main()
 		{
@@ -44,8 +45,7 @@ namespace LGE::Shaders::LitColor
 			vec3 norm = normalize(v_Normal);
 			vec3 lightDir = normalize(u_DiffuseLightPos - v_FragPos);
 			float diff = max(dot(norm, lightDir), 0.0);
-			vec3 lightColor = u_AmbientColor;
-			vec3 diffuse = diff * lightColor;
+			vec3 diffuse = diff * u_DiffuseLightColor;
 			
 			f_Color = vec4((ambient + diffuse) * u_Color, 1.0);
 		}

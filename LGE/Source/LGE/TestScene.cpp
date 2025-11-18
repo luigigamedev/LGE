@@ -45,22 +45,15 @@ namespace LGE
 		m_CubeBufferLayout->PushFloat2(); // tex coord attribute
 		m_CubeBufferLayout->PushFloat3(); // normal attribute
 
-		// CAMERA ------------------------------------------------------------------------------------------------------
-		m_CameraPos = glm::vec3(0.0f, 1.7f,  0.0f);
-		m_CameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
-		m_CameraYaw = -90.0f; // TODO: initialize from camera forward
-		m_CameraPitch = 0.0f;
-
 		// -------------------------------------------------------------------------------------------------------------
 		m_GroundModel = glm::mat4(1.0f);
 		m_GroundModel = glm::rotate(m_GroundModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		m_GroundModel = glm::scale(m_GroundModel, glm::vec3(32.0f));
 
-		m_LightCubeModel = glm::mat4(1.0f);
-		m_LightCubeModel = glm::translate(m_LightCubeModel, glm::vec3(1.2f, 1.0f, 2.0f));
+		m_LightCubeModel = glm::translate(glm::mat4(1.0f), m_LightPos);
 		m_LightCubeModel = glm::scale(m_LightCubeModel, glm::vec3(0.2f)); 
-
-		m_CubeModel = glm::mat4(1.0f);
+		
+		m_CubeModel = glm::translate(glm::mat4(1.0f), m_CubePos);
 	}
 
 	TestScene::~TestScene()
@@ -163,7 +156,7 @@ namespace LGE
 		// Camera View Matrix ------------------------------------------------------------------------------------------
 		glm::mat4 cameraView = BuildCameraViewMatrix();
 
-		// -------------------------------------------------------------------------------------------------------------
+		// Projection --------------------------------------------------------------------------------------------------
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 		
 		// Render Ground -----------------------------------------------------------------------------------------------
@@ -199,9 +192,11 @@ namespace LGE
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 		m_LitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 0.5f, 0.31f);
-		m_LitColorShaderProgram->SetUniform1f("u_AmbientStrength", 0.2f);
+		m_LitColorShaderProgram->SetUniform1f("u_AmbientStrength", 0.0f);
 		m_LitColorShaderProgram->SetUniform3f("u_AmbientColor", 1.0f, 1.0f, 1.0f);
-		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightPos", 1.2f, 1.0f, 2.0f);
+		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightPos", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightColor", 1.0f, 1.0f, 1.0f);
+
 
 		m_CubeVb->Bind();
 		m_CubeBufferLayout->Attrib();
