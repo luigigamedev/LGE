@@ -52,8 +52,6 @@ namespace LGE
 
 		m_LightCubeModel = glm::translate(glm::mat4(1.0f), m_LightPos);
 		m_LightCubeModel = glm::scale(m_LightCubeModel, glm::vec3(0.2f)); 
-		
-		m_CubeModel = glm::translate(glm::mat4(1.0f), m_CubePos);
 	}
 
 	TestScene::~TestScene()
@@ -126,6 +124,11 @@ namespace LGE
 			// MoveFlyCamera(glm::normalize(moveInput), deltaTime);
 			MoveFpsCamera(glm::normalize(moveInput), deltaTime);
 		}
+
+		// Move Cubes --------------------------------------------------------------------------------------------------
+
+		//m_CubePos.x = glm::sin(Application::Get().GetTime());
+		//m_CubeScale.y = 1.0f + glm::sin(Application::Get().GetTime()) * 1.0f;
 	}
 
 	void TestScene::MoveFlyCamera(const glm::vec2 moveInput, const float deltaTime)
@@ -197,11 +200,14 @@ namespace LGE
 		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightPos", m_LightPos.x, m_LightPos.y, m_LightPos.z);
 		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightColor", 1.0f, 1.0f, 1.0f);
 
-
 		m_CubeVb->Bind();
 		m_CubeBufferLayout->Attrib();
-		
-		m_LitColorShaderProgram->SetUniformMatrix4f("u_Model", m_CubeModel);
+
+		glm::mat4 cubeModel = glm::translate(glm::mat4(1.0f), m_CubePos);
+		cubeModel = glm::rotate(cubeModel, glm::radians(m_CubeYaw), glm::vec3(0.0f, 1.0f, 0.0f));
+		cubeModel = glm::scale(cubeModel, m_CubeScale);
+
+		m_LitColorShaderProgram->SetUniformMatrix4f("u_Model", cubeModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}

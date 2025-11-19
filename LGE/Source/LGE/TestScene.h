@@ -40,17 +40,16 @@ namespace LGE
 
 		// Input
 		bool m_FirstMouse = true;
-		float m_LastMouseX;
-		float m_LastMouseY;
-
-		// Transforms
-		glm::mat4 m_GroundModel;
-		glm::mat4 m_LightCubeModel;
-		glm::mat4 m_CubeModel;
+		float m_LastMouseX = 0.0f;
+		float m_LastMouseY = 0.0f;
 
 		// Scene Setup
-		glm::vec3 m_LightPos = glm::vec3(1.2f, 1.0f, 2.0f);
-		glm::vec3 m_CubePos = glm::vec3(0.0f);
+		glm::mat4 m_GroundModel;
+		glm::mat4 m_LightCubeModel;
+		glm::vec3 m_LightPos = glm::vec3(0.0f, 2.0f, 0.0f);
+		glm::vec3 m_CubePos = glm::vec3(0.0f, 0.5f, -5.0f);
+		float m_CubeYaw = 0.0f;
+		glm::vec3 m_CubeScale = glm::vec3(1.0f);
 	public:
 		virtual void Update(const float deltaTime) override;
 		void MoveFlyCamera(const glm::vec2 moveInput, const float deltaTime);
