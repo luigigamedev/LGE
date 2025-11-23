@@ -46,8 +46,8 @@ namespace LGE
 		// Scene Setup
 		glm::mat4 m_GroundModel;
 		glm::mat4 m_LightCubeModel;
-		glm::vec3 m_LightPos = glm::vec3(0.0f, 2.0f, 0.0f);
-		glm::vec3 m_CubePos = glm::vec3(0.0f, 0.5f, -5.0f);
+		glm::vec3 m_LightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+		glm::vec3 m_CubePos = glm::vec3(0.0f, 0.0f, 0.0f);
 		float m_CubeYaw = 0.0f;
 		glm::vec3 m_CubeScale = glm::vec3(1.0f);
 	public:

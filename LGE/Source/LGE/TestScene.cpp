@@ -195,10 +195,9 @@ namespace LGE
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
 		m_LitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 		m_LitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 0.5f, 0.31f);
-		m_LitColorShaderProgram->SetUniform1f("u_AmbientStrength", 0.0f);
-		m_LitColorShaderProgram->SetUniform3f("u_AmbientColor", 1.0f, 1.0f, 1.0f);
-		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightPos", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-		m_LitColorShaderProgram->SetUniform3f("u_DiffuseLightColor", 1.0f, 1.0f, 1.0f);
+		m_LitColorShaderProgram->SetUniform3f("u_LightPos", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+		m_LitColorShaderProgram->SetUniform3f("u_LightColor", 1.0f, 1.0f, 1.0f);
+		m_LitColorShaderProgram->SetUniform3f("u_ViewPos", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
 
 		m_CubeVb->Bind();
 		m_CubeBufferLayout->Attrib();

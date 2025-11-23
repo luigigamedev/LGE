@@ -20,7 +20,7 @@ namespace LGE::Shaders::LitColor
 		{
 			gl_Position = u_Projection * u_View * u_Model * vec4(a_Position, 1.0);
 			v_FragPos = vec3(u_Model * vec4(a_Position, 1.0));
-			v_Normal = a_Normal;
+			v_Normal = mat3(transpose(inverse(u_Model))) * a_Normal;
 		}
 	)";
 
@@ -32,22 +32,32 @@ namespace LGE::Shaders::LitColor
 
 		out vec4 f_Color; // obligatory fragment color output
 
-		uniform vec3 u_Color;
-		uniform float u_AmbientStrength;
-		uniform vec3 u_AmbientColor;
-		uniform vec3 u_DiffuseLightPos;
-		uniform vec3 u_DiffuseLightColor;
+		uniform vec3 u_Color; // object color
+		uniform vec3 u_LightPos;
+		uniform vec3 u_LightColor;
+		uniform vec3 u_ViewPos;
 				
 		void main()
 		{
-			vec3 ambient = u_AmbientStrength * u_AmbientColor;
-			
+			// ambient
+			float ambientStrength = 0.1;
+			vec3 ambient = ambientStrength * u_LightColor;
+  	
+			// diffuse 
 			vec3 norm = normalize(v_Normal);
-			vec3 lightDir = normalize(u_DiffuseLightPos - v_FragPos);
+			vec3 lightDir = normalize(u_LightPos - v_FragPos);
 			float diff = max(dot(norm, lightDir), 0.0);
-			vec3 diffuse = diff * u_DiffuseLightColor;
+			vec3 diffuse = diff * u_LightColor;
 			
-			f_Color = vec4((ambient + diffuse) * u_Color, 1.0);
+			// specular
+			float specularStrength = 0.5;
+			vec3 viewDir = normalize(u_ViewPos - v_FragPos);
+			vec3 reflectDir = reflect(-lightDir, norm);  
+			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+			vec3 specular = specularStrength * spec * u_LightColor;  
+			    
+			vec3 result = (ambient + diffuse + specular) * u_Color;
+			f_Color = vec4(result, 1.0);
 		}
 	)";
 }
