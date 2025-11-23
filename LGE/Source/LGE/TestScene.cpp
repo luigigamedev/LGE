@@ -14,7 +14,7 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
-#include "Shaders/LitColorShader.h"
+#include "Shaders/MaterialsShader.h"
 #include "Shaders/UnlitTextureShader.h"
 #include "Shaders/UnlitColorShader.h"
 
@@ -29,7 +29,7 @@ namespace LGE
 
 		m_UnlitTextureShaderProgram = new ShaderProgram(Shaders::UnlitTexture::VERTEX, Shaders::UnlitTexture::FRAGMENT);
 		m_UnlitColorShaderProgram = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
-		m_LitColorShaderProgram = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT);
+		m_MaterialsShaderProgram = new ShaderProgram(Shaders::Materials::VERTEX, Shaders::Materials::FRAGMENT);
 		
 		// MESHES ------------------------------------------------------------------------------------------------------
 		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
@@ -62,7 +62,7 @@ namespace LGE
 		
 		delete m_UnlitTextureShaderProgram;
 		delete m_UnlitColorShaderProgram;
-		delete m_LitColorShaderProgram;
+		delete m_MaterialsShaderProgram;
 
 		delete m_QuadVb;
 		delete m_CubeVb;
@@ -191,23 +191,37 @@ namespace LGE
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		// Render Cube -------------------------------------------------------------------------------------------------
-		m_LitColorShaderProgram->Bind();
-		m_LitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
-		m_LitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
-		m_LitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 0.5f, 0.31f);
-		m_LitColorShaderProgram->SetUniform3f("u_LightPos", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-		m_LitColorShaderProgram->SetUniform3f("u_LightColor", 1.0f, 1.0f, 1.0f);
-		m_LitColorShaderProgram->SetUniform3f("u_ViewPos", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
+		m_MaterialsShaderProgram->Bind();
 
-		m_CubeVb->Bind();
-		m_CubeBufferLayout->Attrib();
+		m_MaterialsShaderProgram->SetUniform3f("u_Light.position", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+		m_MaterialsShaderProgram->SetUniform3f("u_ViewPos", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
 
+		// light properties
+		m_MaterialsShaderProgram->SetUniform3f("u_Light.ambient", 0.2f, 0.2f, 0.2f);
+		m_MaterialsShaderProgram->SetUniform3f("u_Light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+		m_MaterialsShaderProgram->SetUniform3f("u_Light.specular", 1.0f, 1.0f, 1.0f);
+
+		// material properties
+		m_MaterialsShaderProgram->SetUniform3f("u_Material.ambient", 1.0f, 0.5f, 0.31f);
+		m_MaterialsShaderProgram->SetUniform3f("u_Material.diffuse", 1.0f, 0.5f, 0.31f);
+		m_MaterialsShaderProgram->SetUniform3f("u_Material.specular", 0.5f, 0.5f, 0.5f); // specular lighting doesn't have full effect on this object's material
+		m_MaterialsShaderProgram->SetUniform1f("u_Material.shininess", 32.0f);
+
+		// view/projection
+		m_MaterialsShaderProgram->SetUniformMatrix4f("u_View", cameraView);
+		m_MaterialsShaderProgram->SetUniformMatrix4f("u_Projection", projection);
+
+		// model (world transformation)
 		glm::mat4 cubeModel = glm::translate(glm::mat4(1.0f), m_CubePos);
 		cubeModel = glm::rotate(cubeModel, glm::radians(m_CubeYaw), glm::vec3(0.0f, 1.0f, 0.0f));
 		cubeModel = glm::scale(cubeModel, m_CubeScale);
+		m_MaterialsShaderProgram->SetUniformMatrix4f("u_Model", cubeModel);
+		
+		// bind mesh
+		m_CubeVb->Bind();
+		m_CubeBufferLayout->Attrib();
 
-		m_LitColorShaderProgram->SetUniformMatrix4f("u_Model", cubeModel);
-
+		// render
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 	
