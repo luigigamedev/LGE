@@ -1,18 +1,20 @@
 #pragma once
 
-// Used in learnopengl Materials chapter
+// Used in learnopengl Lighting maps chapter
 
-namespace LGE::Shaders::Materials
+namespace LGE::Shaders::LightingMaps
 {
-	constexpr const char* VERTEX = R"(
+    constexpr const char* VERTEX = R"(
 		#version 330 core
 		
 		// attributes
 		layout(location = 0) in vec3 a_Pos;
 		layout(location = 1) in vec3 a_Normal;
+        layout(location = 2) in vec2 a_TexCoords;
 		
 		out vec3 v_FragPos;	
 		out vec3 v_Normal;
+        out vec2 v_TexCoords;
 	
 		uniform mat4 u_Model;
 		uniform mat4 u_View;
@@ -22,20 +24,20 @@ namespace LGE::Shaders::Materials
 		{
 			v_FragPos = vec3(u_Model * vec4(a_Pos, 1.0));
 			v_Normal = mat3(transpose(inverse(u_Model))) * a_Normal;  
+            v_TexCoords = a_TexCoords;
     
 			gl_Position = u_Projection * u_View * vec4(v_FragPos, 1.0);
 		}
 	)";
 
-	constexpr const char* FRAGMENT = R"(
+    constexpr const char* FRAGMENT = R"(
 		#version 330 core
         
         out vec4 f_Color;
         
         struct Material {
-            vec3 ambient;
-            vec3 diffuse;
-            vec3 specular;    
+            sampler2D diffuse; // diffuse map (a texture)
+            sampler2D specular; // specular map    
             float shininess;
         }; 
         
@@ -50,6 +52,7 @@ namespace LGE::Shaders::Materials
         
         in vec3 v_FragPos;  
         in vec3 v_Normal;  
+        in vec2 v_TexCoords;
           
         uniform vec3 u_ViewPos;
         uniform Material u_Material;
@@ -58,22 +61,21 @@ namespace LGE::Shaders::Materials
         void main()
         {
             // ambient
-            vec3 ambient = u_Light.ambient * u_Material.ambient;
+            vec3 ambient = u_Light.ambient * texture(u_Material.diffuse, v_TexCoords).rgb;
           	
             // diffuse 
             vec3 norm = normalize(v_Normal);
             vec3 lightDir = normalize(u_Light.position - v_FragPos);
             float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = u_Light.diffuse * (diff * u_Material.diffuse);
+            vec3 diffuse = u_Light.diffuse * diff * texture(u_Material.diffuse, v_TexCoords).rgb;
             
             // specular
             vec3 viewDir = normalize(u_ViewPos - v_FragPos);
             vec3 reflectDir = reflect(-lightDir, norm);  
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shininess);
-            vec3 specular = u_Light.specular * (spec * u_Material.specular);  
+            vec3 specular = u_Light.specular * spec * texture(u_Material.specular, v_TexCoords).rgb;  
                 
-            vec3 result = ambient + diffuse + specular;
-            f_Color = vec4(result, 1.0);
+            f_Color = vec4(ambient + diffuse + specular, 1.0);
         } 
 	)";
 }

@@ -14,7 +14,7 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
-#include "Shaders/MaterialsShader.h"
+#include "Shaders/LightingMapsShader.h"
 #include "Shaders/UnlitTextureShader.h"
 #include "Shaders/UnlitColorShader.h"
 
@@ -26,10 +26,12 @@ namespace LGE
 
 		// LOAD RESOURCES ----------------------------------------------------------------------------------------------
 		m_SmoothStoneTexture = new Texture("Resources/Textures/Minecraft/smooth-stone.jpg", true);
+		m_DiffuseMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2.png", false);
+		m_SpecularMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
 
 		m_UnlitTextureShaderProgram = new ShaderProgram(Shaders::UnlitTexture::VERTEX, Shaders::UnlitTexture::FRAGMENT);
 		m_UnlitColorShaderProgram = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
-		m_MaterialsShaderProgram = new ShaderProgram(Shaders::Materials::VERTEX, Shaders::Materials::FRAGMENT);
+		m_LightingMapsShaderProgram = new ShaderProgram(Shaders::LightingMaps::VERTEX, Shaders::LightingMaps::FRAGMENT);
 		
 		// MESHES ------------------------------------------------------------------------------------------------------
 		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
@@ -38,12 +40,8 @@ namespace LGE
 
 		m_BufferLayout = new BufferLayout();
 		m_BufferLayout->PushFloat3(); // position attribute
+		m_BufferLayout->PushFloat3(); // normal attribute
 		m_BufferLayout->PushFloat2(); // tex coord attribute
-		
-		m_CubeBufferLayout = new BufferLayout();
-		m_CubeBufferLayout->PushFloat3(); // position attribute
-		m_CubeBufferLayout->PushFloat2(); // tex coord attribute
-		m_CubeBufferLayout->PushFloat3(); // normal attribute
 
 		// -------------------------------------------------------------------------------------------------------------
 		m_GroundModel = glm::mat4(1.0f);
@@ -59,15 +57,16 @@ namespace LGE
 		std::cout << "[TestScene] ~TestScene(){" << '\n';
 
 		delete m_SmoothStoneTexture;
+		delete m_DiffuseMapTexture;
+		delete m_SpecularMapTexture;
 		
 		delete m_UnlitTextureShaderProgram;
 		delete m_UnlitColorShaderProgram;
-		delete m_MaterialsShaderProgram;
+		delete m_LightingMapsShaderProgram;
 
 		delete m_QuadVb;
 		delete m_CubeVb;
 		delete m_BufferLayout;
-		delete m_CubeBufferLayout;
 
 		std::cout << "[TestScene] ~TestScene()}" << '\n';
 	}
@@ -121,8 +120,8 @@ namespace LGE
 
 		if (glm::length(moveInput) > 0.0f)
 		{
-			// MoveFlyCamera(glm::normalize(moveInput), deltaTime);
-			MoveFpsCamera(glm::normalize(moveInput), deltaTime);
+			MoveFlyCamera(glm::normalize(moveInput), deltaTime);
+			//MoveFpsCamera(glm::normalize(moveInput), deltaTime);
 		}
 
 		// Move Cubes --------------------------------------------------------------------------------------------------
@@ -163,19 +162,19 @@ namespace LGE
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 		
 		// Render Ground -----------------------------------------------------------------------------------------------
-		m_SmoothStoneTexture->Bind(0);
-		m_UnlitTextureShaderProgram->Bind();
-		m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_View", cameraView);
-		m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_Projection", projection);
-		m_UnlitTextureShaderProgram->SetUniform1i("u_Texture", 0);
-		m_UnlitTextureShaderProgram->SetUniform2f("u_Tiling", 32.0f, 32.0f);
+		//m_SmoothStoneTexture->Bind(0);
+		//m_UnlitTextureShaderProgram->Bind();
+		//m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_View", cameraView);
+		//m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_Projection", projection);
+		//m_UnlitTextureShaderProgram->SetUniform1i("u_Texture", 0);
+		//m_UnlitTextureShaderProgram->SetUniform2f("u_Tiling", 32.0f, 32.0f);
 
-		m_QuadVb->Bind();
-		m_BufferLayout->Attrib();
+		//m_QuadVb->Bind();
+		//m_BufferLayout->Attrib();
 
-		m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_Model", m_GroundModel);
+		//m_UnlitTextureShaderProgram->SetUniformMatrix4f("u_Model", m_GroundModel);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// Render Light Cube -------------------------------------------------------------------------------------------
 		m_UnlitColorShaderProgram->Bind();
@@ -184,42 +183,43 @@ namespace LGE
 		m_UnlitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 1.0f, 1.0f);
 
 		m_CubeVb->Bind();
-		m_CubeBufferLayout->Attrib();
+		m_BufferLayout->Attrib();
 		
 		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_Model", m_LightCubeModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		// Render Cube -------------------------------------------------------------------------------------------------
-		m_MaterialsShaderProgram->Bind();
+		m_LightingMapsShaderProgram->Bind();
 
-		m_MaterialsShaderProgram->SetUniform3f("u_Light.position", m_LightPos.x, m_LightPos.y, m_LightPos.z);
-		m_MaterialsShaderProgram->SetUniform3f("u_ViewPos", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
+		m_LightingMapsShaderProgram->SetUniform3f("u_Light.position", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+		m_LightingMapsShaderProgram->SetUniform3f("u_ViewPos", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
 
 		// light properties
-		m_MaterialsShaderProgram->SetUniform3f("u_Light.ambient", 0.2f, 0.2f, 0.2f);
-		m_MaterialsShaderProgram->SetUniform3f("u_Light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
-		m_MaterialsShaderProgram->SetUniform3f("u_Light.specular", 1.0f, 1.0f, 1.0f);
+		m_LightingMapsShaderProgram->SetUniform3f("u_Light.ambient", 0.2f, 0.2f, 0.2f);
+		m_LightingMapsShaderProgram->SetUniform3f("u_Light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+		m_LightingMapsShaderProgram->SetUniform3f("u_Light.specular", 1.0f, 1.0f, 1.0f);
 
 		// material properties
-		m_MaterialsShaderProgram->SetUniform3f("u_Material.ambient", 1.0f, 0.5f, 0.31f);
-		m_MaterialsShaderProgram->SetUniform3f("u_Material.diffuse", 1.0f, 0.5f, 0.31f);
-		m_MaterialsShaderProgram->SetUniform3f("u_Material.specular", 0.5f, 0.5f, 0.5f); // specular lighting doesn't have full effect on this object's material
-		m_MaterialsShaderProgram->SetUniform1f("u_Material.shininess", 32.0f);
+		m_DiffuseMapTexture->Bind(0);
+		m_LightingMapsShaderProgram->SetUniform1i("u_Material.diffuse", 0);
+		m_SpecularMapTexture->Bind(1);
+		m_LightingMapsShaderProgram->SetUniform1i("u_Material.specular", 1);
+		m_LightingMapsShaderProgram->SetUniform1f("u_Material.shininess", 64.0f);
 
 		// view/projection
-		m_MaterialsShaderProgram->SetUniformMatrix4f("u_View", cameraView);
-		m_MaterialsShaderProgram->SetUniformMatrix4f("u_Projection", projection);
+		m_LightingMapsShaderProgram->SetUniformMatrix4f("u_View", cameraView);
+		m_LightingMapsShaderProgram->SetUniformMatrix4f("u_Projection", projection);
 
 		// model (world transformation)
 		glm::mat4 cubeModel = glm::translate(glm::mat4(1.0f), m_CubePos);
 		cubeModel = glm::rotate(cubeModel, glm::radians(m_CubeYaw), glm::vec3(0.0f, 1.0f, 0.0f));
 		cubeModel = glm::scale(cubeModel, m_CubeScale);
-		m_MaterialsShaderProgram->SetUniformMatrix4f("u_Model", cubeModel);
+		m_LightingMapsShaderProgram->SetUniformMatrix4f("u_Model", cubeModel);
 		
 		// bind mesh
 		m_CubeVb->Bind();
-		m_CubeBufferLayout->Attrib();
+		m_BufferLayout->Attrib();
 
 		// render
 		glDrawArrays(GL_TRIANGLES, 0, 36);

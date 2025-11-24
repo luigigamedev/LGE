@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+// // Used in learnopengl Basic Lighting chapter
+
 namespace LGE::Shaders::LitColor
 {
 	constexpr const char* VERTEX = R"(
@@ -7,7 +9,7 @@ namespace LGE::Shaders::LitColor
 		
 		// attributes
 		layout(location = 0) in vec3 a_Position;
-		layout(location = 2) in vec3 a_Normal;
+		layout(location = 1) in vec3 a_Normal;
 		
 		out vec3 v_FragPos;	
 		out vec3 v_Normal;
