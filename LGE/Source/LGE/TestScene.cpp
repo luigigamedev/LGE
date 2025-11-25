@@ -14,8 +14,7 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
-#include "Shaders/LightCasters2Shader.h"
-#include "Shaders/UnlitColorShader.h"
+#include "Shaders/LightCasters3Shader.h"
 
 namespace LGE
 {
@@ -27,8 +26,7 @@ namespace LGE
 		m_DiffuseMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2.png", false);
 		m_SpecularMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
 
-		m_UnlitColorShaderProgram = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
-		m_LightCastersShaderProgram = new ShaderProgram(Shaders::LightCasters2::VERTEX, Shaders::LightCasters2::FRAGMENT);
+		m_LightCastersShaderProgram = new ShaderProgram(Shaders::LightCasters3::VERTEX, Shaders::LightCasters3::FRAGMENT);
 		
 		// MESHES ------------------------------------------------------------------------------------------------------
 		m_CubeVb = new VertexBuffer(Meshes::CUBE, sizeof(Meshes::CUBE));
@@ -46,7 +44,6 @@ namespace LGE
 		delete m_DiffuseMapTexture;
 		delete m_SpecularMapTexture;
 		
-		delete m_UnlitColorShaderProgram;
 		delete m_LightCastersShaderProgram;
 
 		delete m_CubeVb;
@@ -144,26 +141,14 @@ namespace LGE
 
 		// Projection --------------------------------------------------------------------------------------------------
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
-		// Render Light Cube -------------------------------------------------------------------------------------------
-		m_UnlitColorShaderProgram->Bind();
-		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_View", cameraView);
-		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_Projection", projection);
-		m_UnlitColorShaderProgram->SetUniform3f("u_Color", 1.0f, 1.0f, 1.0f);
-
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
-		
-		glm::mat4 lightCubeModel = glm::translate(glm::mat4(1.0f), m_LightPos);
-		lightCubeModel = glm::scale(lightCubeModel, glm::vec3(0.2f));
-		m_UnlitColorShaderProgram->SetUniformMatrix4f("u_Model", lightCubeModel);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		// Render Cube -------------------------------------------------------------------------------------------------
 		m_LightCastersShaderProgram->Bind();
 
-		m_LightCastersShaderProgram->SetUniform3f("u_Light.position", m_LightPos.x, m_LightPos.y, m_LightPos.z);
+		m_LightCastersShaderProgram->SetUniform3f("u_Light.position", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
+		m_LightCastersShaderProgram->SetUniform3f("u_Light.direction", m_CameraForward.x, m_CameraForward.y, m_CameraForward.z);
+		m_LightCastersShaderProgram->SetUniform1f("u_Light.cutOff", glm::cos(glm::radians(12.5f)));
+		m_LightCastersShaderProgram->SetUniform1f("u_Light.outerCutOff", glm::cos(glm::radians(17.5f)));
 		m_LightCastersShaderProgram->SetUniform3f("u_ViewPos", m_CameraPos.x, m_CameraPos.y, m_CameraPos.z);
 
 		// light properties

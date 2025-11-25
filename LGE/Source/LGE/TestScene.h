@@ -23,7 +23,6 @@ namespace LGE
 		Texture* m_SpecularMapTexture = nullptr;
 
 		// Shaders
-		ShaderProgram* m_UnlitColorShaderProgram = nullptr;
 		ShaderProgram* m_LightCastersShaderProgram = nullptr;
 
 		// Vertex
@@ -42,7 +41,6 @@ namespace LGE
 		float m_LastMouseY = 0.0f;
 
 		// Scene Setup
-		glm::vec3 m_LightPos = glm::vec3(1.2f, 1.0f, 2.0f);
 		unsigned int m_CubeCount = 10;
 		glm::vec3 m_CubesPos[10] = {
 			glm::vec3(0.0f,  0.0f,  0.0f),
