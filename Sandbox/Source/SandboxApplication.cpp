@@ -5,22 +5,22 @@
 class SandboxApplication : public LGE::Application 
 {
 private:
-	LGE::TestScene* m_TestScene = nullptr;
+	LGE::DemoScene* m_DemoScene = nullptr;
 
 public:
 	SandboxApplication()
 	{
 		std::cout << "[SandboxApplication] SandboxApplication(){" << '\n';
 
-		m_TestScene = new LGE::TestScene();
-		ActivateScene(m_TestScene);
+		m_DemoScene = new LGE::DemoScene();
+		ActivateScene(m_DemoScene);
 	}
 
 	~SandboxApplication() override
 	{
 		std::cout << "[SandboxApplication] ~SandboxApplication(){" << '\n';
 
-		delete m_TestScene;
+		delete m_DemoScene;
 
 		std::cout << "[SandboxApplication] ~SandboxApplication()}" << '\n';
 	}
