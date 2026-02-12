@@ -4,7 +4,7 @@
 
 #include "LGE/Core/Application.h"
 
-#include "LGE/TestScene.h"
+#include "LGE/LoglLightingScene.h"
 #include "LGE/DemoScene.h"
 
 // ----Entry Point---------------------------------------------------------------------------------

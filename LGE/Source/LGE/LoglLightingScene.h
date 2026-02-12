@@ -12,11 +12,11 @@ namespace LGE
 	class Texture;
 	class VertexBuffer;
 	
-	class LGE_API TestScene : public Scene
+	class LGE_API LoglLightingScene : public Scene
 	{
 	public:
-		TestScene();
-		~TestScene() override;
+		LoglLightingScene();
+		~LoglLightingScene() override;
 	private:
 		// Textures
 		Texture* m_DiffuseMapTexture = nullptr;

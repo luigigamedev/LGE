@@ -108,7 +108,7 @@
     <ClInclude Include="Source\LGE\Shaders\LitColorShader.h" />
     <ClInclude Include="Source\LGE\Shaders\UnlitColorShader.h" />
     <ClInclude Include="Source\LGE\Shaders\UnlitTextureShader.h" />
-    <ClInclude Include="Source\LGE\TestScene.h" />
+    <ClInclude Include="Source\LGE\LoglLightingScene.h" />
     <ClInclude Include="Source\LGE\Rendering\Texture.h" />
     <ClInclude Include="Source\LGE\Core\Window.h" />
     <ClInclude Include="Source\Vendor\glm\common.hpp" />
@@ -553,7 +553,7 @@
     <ClCompile Include="Source\LGE\DemoScene.cpp" />
     <ClCompile Include="Source\LGE\Rendering\ShaderProgram.cpp" />
     <ClCompile Include="Source\LGE\Rendering\VertexBuffer.cpp" />
-    <ClCompile Include="Source\LGE\TestScene.cpp" />
+    <ClCompile Include="Source\LGE\LoglLightingScene.cpp" />
     <ClCompile Include="Source\LGE\Rendering\Texture.cpp" />
     <ClCompile Include="Source\LGE\Core\Window.cpp" />
     <ClCompile Include="Source\Vendor\Glad\glad.c" />

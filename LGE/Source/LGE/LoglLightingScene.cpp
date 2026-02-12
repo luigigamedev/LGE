@@ -1,4 +1,4 @@
-#include "TestScene.h"
+#include "LoglLightingScene.h"
 
 #include <iostream>
 
@@ -14,14 +14,14 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
-#include "Shaders/MultipleLights.h"
+#include "Shaders/Logl/MultipleLights.h"
 #include "Shaders/UnlitColorShader.h"
 
 namespace LGE
 {
-	TestScene::TestScene()
+	LoglLightingScene::LoglLightingScene()
 	{
-		std::cout << "[TestScene] TestScene(){" << '\n';
+		std::cout << "[LoglLightingScene] LoglLightingScene(){" << '\n';
 
 		// LOAD RESOURCES ----------------------------------------------------------------------------------------------
 		m_DiffuseMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2.png", false);
@@ -39,9 +39,9 @@ namespace LGE
 		m_BufferLayout->PushFloat2(); // tex coord attribute
 	}
 
-	TestScene::~TestScene()
+	LoglLightingScene::~LoglLightingScene()
 	{
-		std::cout << "[TestScene] ~TestScene(){" << '\n';
+		std::cout << "[LoglLightingScene] ~LoglLightingScene(){" << '\n';
 
 		delete m_DiffuseMapTexture;
 		delete m_SpecularMapTexture;
@@ -52,10 +52,10 @@ namespace LGE
 		delete m_CubeVb;
 		delete m_BufferLayout;
 
-		std::cout << "[TestScene] ~TestScene()}" << '\n';
+		std::cout << "[LoglLightingScene] ~LoglLightingScene()}" << '\n';
 	}
 
-	void TestScene::Update(const float deltaTime)
+	void LoglLightingScene::Update(const float deltaTime)
 	{
 		// Rotate Camera -----------------------------------------------------------------------------------------------
 		const float newMouseX = static_cast<float>(Application::Get().GetMouseX());
@@ -114,7 +114,7 @@ namespace LGE
 		//m_CubeScale.y = 1.0f + glm::sin(Application::Get().GetTime()) * 1.0f;
 	}
 
-	void TestScene::MoveFlyCamera(const glm::vec2 moveInput, const float deltaTime)
+	void LoglLightingScene::MoveFlyCamera(const glm::vec2 moveInput, const float deltaTime)
 	{
 		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
 		const glm::vec3 cameraRight = glm::normalize(glm::cross(m_CameraForward, worldUp));
@@ -125,7 +125,7 @@ namespace LGE
 		m_CameraPos += vel * deltaTime;
 	}
 
-	void TestScene::MoveFpsCamera(const glm::vec2 moveInput, const float deltaTime)
+	void LoglLightingScene::MoveFpsCamera(const glm::vec2 moveInput, const float deltaTime)
 	{
 		glm::vec3 forward = glm::normalize(glm::vec3(cos(glm::radians(m_CameraYaw)), 0.0f, sin(glm::radians(m_CameraYaw))));
 		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
@@ -137,7 +137,7 @@ namespace LGE
 		m_CameraPos += vel * deltaTime;
 	}
 
-	void TestScene::Render()
+	void LoglLightingScene::Render()
 	{
 		// Camera View Matrix ------------------------------------------------------------------------------------------
 		glm::mat4 cameraView = BuildCameraViewMatrix();
@@ -256,7 +256,7 @@ namespace LGE
 		}
 	}
 	
-	glm::mat4 TestScene::BuildCameraViewMatrix() const
+	glm::mat4 LoglLightingScene::BuildCameraViewMatrix() const
 	{
 		constexpr bool manuallyCreateCameraViewMatrix = true;
 
