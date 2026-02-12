@@ -63,7 +63,7 @@ namespace LGE
 		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
 		glm::vec3 playerRight = glm::normalize(glm::cross(playerForward, worldUp));
 		
-		if (glm::length(m_Input.Axis) > 0.0f) 
+		if (m_Input.Axis != glm::vec2(0.0f))
 		{
 			constexpr float playerSpeed = 5.0f;
 			const glm::vec3 playerVel = (playerForward * m_Input.Axis.y + playerRight * m_Input.Axis.x) * playerSpeed;
@@ -144,17 +144,17 @@ namespace LGE
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
 
-		glm::vec3 cubePos = glm::vec3(0.5f, 0.5f, -5.5f);
-		float cubeYaw = -90.0f;
-		glm::vec3 cubeScale = glm::vec3(1.0f, 1.0f, 1.0f);
-		glm::mat4 cubeModel = glm::mat4(1.0f);
-		cubeModel = glm::translate(cubeModel, cubePos);
 		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
-		cubeModel = glm::rotate(cubeModel, glm::radians(cubeYaw), worldUp);
-		cubeModel = glm::scale(cubeModel, cubeScale);
-		m_UnlitColorShader->SetUniformMatrix4f("u_Model", cubeModel);
+		
+		for (unsigned int i = 0; i < m_CubeCount; i++)
+		{
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), m_CubesPos[i]);
+			model = glm::rotate(model, glm::radians(m_CubesYaw[i]), worldUp);
+			model = glm::scale(model, m_CubesScale[i]);
+			m_UnlitColorShader->SetUniformMatrix4f("u_Model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 	}
 
 	glm::mat4 DemoScene::BuildCameraViewMatrix() const
