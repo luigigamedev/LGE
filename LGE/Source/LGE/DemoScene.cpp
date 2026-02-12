@@ -14,6 +14,7 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
+#include "Shaders/LitTextureShader.h"
 #include "Shaders/UnlitColorShader.h"
 #include "Shaders/UnlitTextureShader.h"
 
@@ -31,8 +32,10 @@ namespace LGE
 
 		m_UnlitColorShader = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
 		m_UnlitTextureShader = new ShaderProgram(Shaders::UnlitTexture::VERTEX, Shaders::UnlitTexture::FRAGMENT);
+		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT);
 
 		m_SmoothStoneTexture = new Texture("Resources/Textures/Minecraft/smooth-stone.jpg", true);
+		m_StoneTexture = new Texture("Resources/Textures/Minecraft/stone.jpg", true);
 
 		m_Camera.Pos = glm::vec3(0.0f, 1.7f, 0.0f);
 	}
@@ -46,8 +49,10 @@ namespace LGE
 
 		delete m_UnlitColorShader;
 		delete m_UnlitTextureShader;
+		delete m_LitTextureShader;
 
 		delete m_SmoothStoneTexture;
+		delete m_StoneTexture;
 	}
 
 	void DemoScene::Update(const float deltaTime)
@@ -116,9 +121,12 @@ namespace LGE
 
 	void DemoScene::Render()
 	{
+		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
+
 		glm::mat4 cameraView = BuildCameraViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
+		// Ground ------------------------------------------------------------------------------------------------------
 		m_UnlitTextureShader->Bind();
 		m_UnlitTextureShader->SetUniformMatrix4f("u_View", cameraView);
 		m_UnlitTextureShader->SetUniformMatrix4f("u_Projection", projection);
@@ -136,6 +144,7 @@ namespace LGE
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+		// Walls -------------------------------------------------------------------------------------------------------
 		m_UnlitColorShader->Bind();
 		m_UnlitColorShader->SetUniformMatrix4f("u_View", cameraView);
 		m_UnlitColorShader->SetUniformMatrix4f("u_Projection", projection);
@@ -143,18 +152,33 @@ namespace LGE
 
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
-
-		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
 		
-		for (unsigned int i = 0; i < m_CubeCount; i++)
+		for (unsigned int i = 0; i < m_WallCount; i++)
 		{
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), m_CubesPos[i]);
-			model = glm::rotate(model, glm::radians(m_CubesYaw[i]), worldUp);
-			model = glm::scale(model, m_CubesScale[i]);
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), m_WallsPos[i]);
+			model = glm::rotate(model, glm::radians(m_WallsYaw[i]), worldUp);
+			model = glm::scale(model, m_WallsScale[i]);
 			m_UnlitColorShader->SetUniformMatrix4f("u_Model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		// Block -------------------------------------------------------------------------------------------------------
+		m_CubeVb->Bind();
+		m_BufferLayout->Attrib();
+
+		m_LitTextureShader->Bind();
+		m_LitTextureShader->SetUniformMatrix4f("u_View", cameraView);
+		m_LitTextureShader->SetUniformMatrix4f("u_Projection", projection);
+		m_LitTextureShader->SetUniform3f("u_AmbientColor", 1.0f, 1.0f, 1.0f);
+		m_StoneTexture->Bind(0);
+		m_LitTextureShader->SetUniform1i("u_Material.baseMap", 0);
+
+		glm::mat4 blockModel = glm::mat4(1.0f);
+		blockModel = glm::translate(blockModel, glm::vec3(0.5f, 0.5f, 10.5f));
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", blockModel);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
 	glm::mat4 DemoScene::BuildCameraViewMatrix() const

@@ -42,12 +42,14 @@ namespace LGE
 		// Shaders
 		ShaderProgram* m_UnlitColorShader = nullptr;
 		ShaderProgram* m_UnlitTextureShader = nullptr;
+		ShaderProgram* m_LitTextureShader = nullptr;
 
 		// Textures
 		Texture* m_SmoothStoneTexture = nullptr;
+		Texture* m_StoneTexture = nullptr;
 
 		// Player
-		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 0.0f); // Origin at the bottom (ground)
+		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 5.0f); // Origin at the bottom (ground)
 		float m_PlayerYaw = -90.0f; // TODO: initialize from forward; glm::vec3 Forward = glm::vec3(0.0f, 0.0f, -1.0f);
 
 		// Camera
@@ -57,9 +59,9 @@ namespace LGE
 		Input m_Input;
 
 		// House
-		unsigned int m_CubeCount = 18;
+		unsigned int m_WallCount = 18;
 
-		glm::vec3 m_CubesPos[18] = {
+		glm::vec3 m_WallsPos[18] = {
 			// --- Front Facade ---
 			glm::vec3(-4.5f, 1.5f, 0.0f), glm::vec3(4.5f, 1.5f, 0.0f), glm::vec3(0.0f, 2.6f, 0.0f),
 
@@ -81,9 +83,9 @@ namespace LGE
 			glm::vec3(5.0f, 1.5f, -12.0f)
 		};
 
-		float m_CubesYaw[18] = { 0.0f };
+		float m_WallsYaw[18] = { 0.0f };
 
-		glm::vec3 m_CubesScale[18] = {
+		glm::vec3 m_WallsScale[18] = {
 			glm::vec3(7.0f, 3.0f, 0.2f), glm::vec3(7.0f, 3.0f, 0.2f), glm::vec3(2.0f, 0.8f, 0.2f),
 			glm::vec3(0.2f, 3.0f, 16.0f), glm::vec3(0.2f, 3.0f, 16.0f), glm::vec3(16.2f, 3.0f, 0.2f),
 			glm::vec3(0.2f, 3.0f, 12.0f),
