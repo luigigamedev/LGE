@@ -60,48 +60,40 @@ namespace LGE
 		unsigned int m_CubeCount = 18;
 
 		glm::vec3 m_CubesPos[18] = {
-			// --- Front Facade (Z = 0) ---
-			glm::vec3(-4.5f, 1.5f,  0.0f), glm::vec3(4.5f, 1.5f,  0.0f), glm::vec3(0.0f, 2.6f,  0.0f),
+			// --- Front Facade ---
+			glm::vec3(-4.5f, 1.5f, 0.0f), glm::vec3(4.5f, 1.5f, 0.0f), glm::vec3(0.0f, 2.6f, 0.0f),
 
 			// --- Outer Perimeter ---
 			glm::vec3(-8.0f, 1.5f, -8.0f), glm::vec3(8.0f, 1.5f, -8.0f), glm::vec3(0.0f, 1.5f, -16.0f),
 
-			// --- Hallway Left (With Doorway) ---
-			glm::vec3(-2.0f, 1.5f, -2.0f), // Segment 1
-			glm::vec3(-2.0f, 2.6f, -5.0f), // Left Room Door Lintel
-			glm::vec3(-2.0f, 1.5f, -9.0f), // Segment 2
+			// --- Hallway Left ---
+			glm::vec3(-2.0f, 1.5f, -6.0f),
 
-			// --- Hallway Right (Two Doors) ---
-			glm::vec3(2.0f, 1.5f, -1.5f), // Segment 1
-			glm::vec3(2.0f, 2.6f, -4.0f), // Door 1 Lintel
-			glm::vec3(2.0f, 1.5f, -7.0f), // Segment 2
-			glm::vec3(2.0f, 2.6f, -10.0f),// Door 2 Lintel
-			glm::vec3(2.0f, 1.5f, -11.5f),// Segment 3
+			// --- Hallway Right ---
+			glm::vec3(2.0f, 1.5f, -1.5f), glm::vec3(2.0f, 2.6f, -4.0f),
+			glm::vec3(2.0f, 1.5f, -7.0f), glm::vec3(2.0f, 2.6f, -10.0f),
+			glm::vec3(2.0f, 1.5f, -11.5f),
 
-			// --- Dividers & Arch ---
-			glm::vec3(-5.0f, 1.5f, -12.0f), glm::vec3(5.0f, 1.5f, -8.0f),
-			glm::vec3(5.0f, 1.5f, -12.0f), glm::vec3(0.0f, 2.6f, -12.0f)
+			// --- Back Dividers (Z = -12) ---
+			glm::vec3(-3.5f, 1.5f, -12.0f), // Wall segment moved to the right (next to hall)
+			glm::vec3(-6.5f, 2.6f, -12.0f), // Door Lintel moved to the far left (next to outer wall)
+			glm::vec3(5.0f, 1.5f, -8.0f),
+			glm::vec3(5.0f, 1.5f, -12.0f)
 		};
 
-		float m_CubesYaw[18] = {
-			90.0f, 90.0f, 90.0f, 0.0f, 0.0f, 90.0f, // Shell
-			0.0f, 0.0f, 0.0f,                       // Hall Left
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f,           // Hall Right
-			90.0f, 90.0f, 90.0f, 90.0f              // Dividers
-		};
+		float m_CubesYaw[18] = { 0.0f };
 
 		glm::vec3 m_CubesScale[18] = {
-			glm::vec3(0.2f, 3.0f, 7.0f), glm::vec3(0.2f, 3.0f, 7.0f), glm::vec3(0.2f, 0.8f, 2.0f),
-			glm::vec3(0.2f, 3.0f, 16.0f), glm::vec3(0.2f, 3.0f, 16.0f), glm::vec3(0.2f, 3.0f, 16.2f),
-
-			glm::vec3(0.2f, 3.0f, 4.0f), glm::vec3(0.2f, 0.8f, 2.0f), glm::vec3(0.2f, 3.0f, 6.0f),
-
+			glm::vec3(7.0f, 3.0f, 0.2f), glm::vec3(7.0f, 3.0f, 0.2f), glm::vec3(2.0f, 0.8f, 0.2f),
+			glm::vec3(0.2f, 3.0f, 16.0f), glm::vec3(0.2f, 3.0f, 16.0f), glm::vec3(16.2f, 3.0f, 0.2f),
+			glm::vec3(0.2f, 3.0f, 12.0f),
 			glm::vec3(0.2f, 3.0f, 3.0f), glm::vec3(0.2f, 0.8f, 2.0f),
 			glm::vec3(0.2f, 3.0f, 4.0f), glm::vec3(0.2f, 0.8f, 2.0f),
 			glm::vec3(0.2f, 3.0f, 1.0f),
-
-			glm::vec3(0.2f, 3.0f, 6.0f), glm::vec3(0.2f, 3.0f, 6.0f),
-			glm::vec3(0.2f, 3.0f, 6.0f), glm::vec3(0.2f, 0.8f, 4.0f)
+			glm::vec3(3.0f, 3.0f, 0.2f), // Wall
+			glm::vec3(3.0f, 0.8f, 0.2f), // Lintel (3m wide)
+			glm::vec3(6.0f, 3.0f, 0.2f),
+			glm::vec3(6.0f, 3.0f, 0.2f)
 		};
 	public:
 		virtual void Update(const float deltaTime) override;
