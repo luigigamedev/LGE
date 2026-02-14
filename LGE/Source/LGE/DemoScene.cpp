@@ -14,9 +14,8 @@
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexBuffer.h"
+#include "Shaders/LitColorShader.h"
 #include "Shaders/LitTextureShader.h"
-#include "Shaders/UnlitColorShader.h"
-#include "Shaders/UnlitTextureShader.h"
 
 namespace LGE
 {
@@ -30,8 +29,7 @@ namespace LGE
 		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
 		m_CubeVb = new VertexBuffer(Meshes::CUBE, sizeof(Meshes::CUBE));
 
-		m_UnlitColorShader = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
-		m_UnlitTextureShader = new ShaderProgram(Shaders::UnlitTexture::VERTEX, Shaders::UnlitTexture::FRAGMENT);
+		m_LitColorShader = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT);
 		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT);
 
 		m_SmoothStoneTexture = new Texture("Resources/Textures/Minecraft/smooth-stone.jpg", true);
@@ -47,8 +45,7 @@ namespace LGE
 		delete m_QuadVb;
 		delete m_CubeVb;
 
-		delete m_UnlitColorShader;
-		delete m_UnlitTextureShader;
+		delete m_LitColorShader;
 		delete m_LitTextureShader;
 
 		delete m_SmoothStoneTexture;
@@ -127,12 +124,15 @@ namespace LGE
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// Ground ------------------------------------------------------------------------------------------------------
-		m_UnlitTextureShader->Bind();
-		m_UnlitTextureShader->SetUniformMatrix4f("u_View", cameraView);
-		m_UnlitTextureShader->SetUniformMatrix4f("u_Projection", projection);
+		m_LitTextureShader->Bind();
+		m_LitTextureShader->SetUniformMatrix4f("u_View", cameraView);
+		m_LitTextureShader->SetUniformMatrix4f("u_Projection", projection);
+		m_LitTextureShader->SetUniform3f("u_AmbientColor", 0.1f, 0.1f, 0.1f);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", -0.2f, -1.0f, -0.3f);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", 0.5f, 0.5f, 0.5f);
 		m_SmoothStoneTexture->Bind(0);
-		m_UnlitTextureShader->SetUniform1i("u_Texture", 0);
-		m_UnlitTextureShader->SetUniform2f("u_Tiling", 32.0f, 32.0f);
+		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
+		m_LitTextureShader->SetUniform2f("u_Tiling", 32.0f, 32.0f);
 
 		m_QuadVb->Bind();
 		m_BufferLayout->Attrib();
@@ -140,15 +140,18 @@ namespace LGE
 		glm::mat4 groundModel = glm::mat4(1.0f);
 		groundModel = glm::rotate(groundModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		groundModel = glm::scale(groundModel, glm::vec3(32.0f));
-		m_UnlitTextureShader->SetUniformMatrix4f("u_Model", groundModel);
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", groundModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// Walls -------------------------------------------------------------------------------------------------------
-		m_UnlitColorShader->Bind();
-		m_UnlitColorShader->SetUniformMatrix4f("u_View", cameraView);
-		m_UnlitColorShader->SetUniformMatrix4f("u_Projection", projection);
-		m_UnlitColorShader->SetUniform3f("u_Color", 1.0f, 1.0f, 1.0f);
+		m_LitColorShader->Bind();
+		m_LitColorShader->SetUniformMatrix4f("u_View", cameraView);
+		m_LitColorShader->SetUniformMatrix4f("u_Projection", projection);
+		m_LitColorShader->SetUniform3f("u_AmbientColor", 0.1f, 0.1f, 0.1f);
+		m_LitColorShader->SetUniform3f("u_DirectionalLight.dir", -0.2f, -1.0f, -0.3f);
+		m_LitColorShader->SetUniform3f("u_DirectionalLight.color", 0.5f, 0.5f, 0.5f);
+		m_LitColorShader->SetUniform3f("u_Color", 1.0f, 1.0f, 1.0f);
 
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
@@ -158,7 +161,7 @@ namespace LGE
 			glm::mat4 model = glm::translate(glm::mat4(1.0f), m_WallsPos[i]);
 			model = glm::rotate(model, glm::radians(m_WallsYaw[i]), worldUp);
 			model = glm::scale(model, m_WallsScale[i]);
-			m_UnlitColorShader->SetUniformMatrix4f("u_Model", model);
+			m_LitColorShader->SetUniformMatrix4f("u_Model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
@@ -170,9 +173,12 @@ namespace LGE
 		m_LitTextureShader->Bind();
 		m_LitTextureShader->SetUniformMatrix4f("u_View", cameraView);
 		m_LitTextureShader->SetUniformMatrix4f("u_Projection", projection);
-		m_LitTextureShader->SetUniform3f("u_AmbientColor", 1.0f, 1.0f, 1.0f);
+		m_LitTextureShader->SetUniform3f("u_AmbientColor", 0.1f, 0.1f, 0.1f);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", -0.2f, -1.0f, -0.3f);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", 0.5f, 0.5f, 0.5f);
 		m_StoneTexture->Bind(0);
-		m_LitTextureShader->SetUniform1i("u_Material.baseMap", 0);
+		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
+		m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
 
 		glm::mat4 blockModel = glm::mat4(1.0f);
 		blockModel = glm::translate(blockModel, glm::vec3(0.5f, 0.5f, 10.5f));

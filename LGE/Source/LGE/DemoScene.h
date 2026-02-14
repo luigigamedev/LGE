@@ -40,8 +40,7 @@ namespace LGE
 		VertexBuffer* m_CubeVb = nullptr;
 
 		// Shaders
-		ShaderProgram* m_UnlitColorShader = nullptr;
-		ShaderProgram* m_UnlitTextureShader = nullptr;
+		ShaderProgram* m_LitColorShader = nullptr;
 		ShaderProgram* m_LitTextureShader = nullptr;
 
 		// Textures
