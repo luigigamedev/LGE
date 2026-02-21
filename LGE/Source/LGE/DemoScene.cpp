@@ -120,19 +120,27 @@ namespace LGE
 	{
 		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
 
+		glm::vec3 ambientColor(0.05f, 0.05f, 0.07f);
+		glm::vec3 directionalLightDir(-0.5f, -0.4f, -0.3f);
+		glm::vec3 directionalLightColor(0.5f, 0.52f, 0.58f);
+
+		// View and projection -----------------------------------------------------------------------------------------
 		glm::mat4 cameraView = BuildCameraViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// Ground ------------------------------------------------------------------------------------------------------
 		m_LitTextureShader->Bind();
+		m_LitTextureShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
 		m_LitTextureShader->SetUniformMatrix4f("u_View", cameraView);
 		m_LitTextureShader->SetUniformMatrix4f("u_Projection", projection);
-		m_LitTextureShader->SetUniform3f("u_AmbientColor", 0.1f, 0.1f, 0.1f);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", -0.2f, -1.0f, -0.3f);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", 0.5f, 0.5f, 0.5f);
+		m_LitTextureShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
 		m_SmoothStoneTexture->Bind(0);
 		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
 		m_LitTextureShader->SetUniform2f("u_Tiling", 32.0f, 32.0f);
+		m_LitTextureShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
+		m_LitTextureShader->SetUniform1f("u_Material.shininess", 32.0f);
 
 		m_QuadVb->Bind();
 		m_BufferLayout->Attrib();
@@ -146,12 +154,15 @@ namespace LGE
 
 		// Walls -------------------------------------------------------------------------------------------------------
 		m_LitColorShader->Bind();
+		m_LitColorShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
 		m_LitColorShader->SetUniformMatrix4f("u_View", cameraView);
 		m_LitColorShader->SetUniformMatrix4f("u_Projection", projection);
-		m_LitColorShader->SetUniform3f("u_AmbientColor", 0.1f, 0.1f, 0.1f);
-		m_LitColorShader->SetUniform3f("u_DirectionalLight.dir", -0.2f, -1.0f, -0.3f);
-		m_LitColorShader->SetUniform3f("u_DirectionalLight.color", 0.5f, 0.5f, 0.5f);
-		m_LitColorShader->SetUniform3f("u_Color", 1.0f, 1.0f, 1.0f);
+		m_LitColorShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
+		m_LitColorShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
+		m_LitColorShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
+		m_LitColorShader->SetUniform3f("u_Material.color", 1.0f, 1.0f, 1.0f);
+		m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
+		m_LitColorShader->SetUniform1f("u_Material.shininess", 32.0f);
 
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
@@ -166,25 +177,51 @@ namespace LGE
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		// Block -------------------------------------------------------------------------------------------------------
+		// Tex block ---------------------------------------------------------------------------------------------------
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
 
 		m_LitTextureShader->Bind();
+		m_LitTextureShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
 		m_LitTextureShader->SetUniformMatrix4f("u_View", cameraView);
 		m_LitTextureShader->SetUniformMatrix4f("u_Projection", projection);
-		m_LitTextureShader->SetUniform3f("u_AmbientColor", 0.1f, 0.1f, 0.1f);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", -0.2f, -1.0f, -0.3f);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", 0.5f, 0.5f, 0.5f);
+		m_LitTextureShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
 		m_StoneTexture->Bind(0);
 		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
 		m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
+		m_LitTextureShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
+		m_LitTextureShader->SetUniform1f("u_Material.shininess", 32.0f);
 
 		glm::mat4 blockModel = glm::mat4(1.0f);
 		blockModel = glm::translate(blockModel, glm::vec3(0.5f, 0.5f, 10.5f));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", blockModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Color cube --------------------------------------------------------------------------------------------------
+		m_LitColorShader->Bind();
+		m_LitColorShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
+		m_LitColorShader->SetUniformMatrix4f("u_View", cameraView);
+		m_LitColorShader->SetUniformMatrix4f("u_Projection", projection);
+		m_LitColorShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
+		m_LitColorShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
+		m_LitColorShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
+		m_LitColorShader->SetUniform3f("u_Material.color", 1.0f, 0.0f, 0.0f);
+		m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
+		m_LitColorShader->SetUniform1f("u_Material.shininess", 32.0f);
+
+		m_CubeVb->Bind();
+		m_BufferLayout->Attrib();
+
+		glm::mat4 cubeModel = glm::mat4(1.0f);
+		cubeModel = glm::translate(cubeModel, glm::vec3(0.0f, 0.02f, 4.0f));
+		cubeModel = glm::scale(cubeModel, glm::vec3(2.0f, 0.04f, 2.0f));
+		m_LitColorShader->SetUniformMatrix4f("u_Model", cubeModel);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
 	}
 
 	glm::mat4 DemoScene::BuildCameraViewMatrix() const
