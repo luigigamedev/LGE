@@ -42,7 +42,9 @@ namespace LGE::Shaders::LitTexture
 		struct Material 
 		{
 		    sampler2D diffuseMap;
-		    float specularIntensity; // 0.0 - 1.0, how reflective the surface is
+			sampler2D specularMap;
+			bool useSpecularMap;
+		    float specularIntensity; // 0.0 - 1.0, how reflective the surface is, used when no map
 		    float shininess; // e.g. 8=wide, 32=medium, 128=tight sharp highlight
 		};
 		
@@ -70,7 +72,8 @@ namespace LGE::Shaders::LitTexture
 			vec3 viewDir = normalize(u_ViewPos - v_FragPos);
 			vec3 reflectDir = reflect(-lightDir, norm);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shininess);
-			vec3 specular = u_Material.specularIntensity * spec * u_DirectionalLight.color;
+			vec3 specSurface = u_Material.useSpecularMap ? vec3(texture(u_Material.specularMap, v_TexCoords)) : vec3(u_Material.specularIntensity);
+			vec3 specular = u_DirectionalLight.color * specSurface * spec;
 
 			f_Color = vec4(ambient + diffuse + specular, 1.0);
 		}

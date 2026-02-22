@@ -43,10 +43,6 @@ namespace LGE
 		ShaderProgram* m_LitColorShader = nullptr;
 		ShaderProgram* m_LitTextureShader = nullptr;
 
-		// Textures
-		Texture* m_SmoothStoneTexture = nullptr;
-		Texture* m_StoneTexture = nullptr;
-
 		// Player
 		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 5.0f); // Origin at the bottom (ground)
 		float m_PlayerYaw = -90.0f; // TODO: initialize from forward; glm::vec3 Forward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -56,6 +52,26 @@ namespace LGE
 
 		// Input
 		Input m_Input;
+
+		// Ground
+		float m_GroundScale = 32.0f;
+		Texture* m_GroundTexture = nullptr;
+		float m_GroundTiling = 5.0f;
+		float m_GroundSpecularIntensity = 0.05f;
+		float m_GroundShininess = 8.0f;
+
+		// Bound walls
+		float m_BoundWallHeight = 2.0f;
+		Texture* m_BoundWallTexture = nullptr;
+		Texture* m_BoundWallSpecularTexture = nullptr;
+		glm::vec2 m_BoundWallTiling = glm::vec2(16.0f, 2.0f);
+		float m_BoundWallShininess = 32.0f;
+
+		// Logl box (used in learnopengl chapter 2)
+		glm::vec3 m_LoglBoxPos = glm::vec3(0.5f, 0.5f, 10.5f);
+		Texture* m_LoglBoxTexture = nullptr;
+		Texture* m_LoglBoxSpecularTexture = nullptr;
+		float m_LoglBoxShininess = 32.0f;
 	public:
 		virtual void Update(const float deltaTime) override;
 		void ReadMouseInput();

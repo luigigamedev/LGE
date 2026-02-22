@@ -32,10 +32,15 @@ namespace LGE
 		m_LitColorShader = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT);
 		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT);
 
-		m_SmoothStoneTexture = new Texture("Resources/Textures/Minecraft/smooth-stone.jpg", true);
-		m_StoneTexture = new Texture("Resources/Textures/Minecraft/stone.jpg", true);
-
 		m_Camera.Pos = glm::vec3(0.0f, 1.7f, 0.0f);
+
+		m_GroundTexture = new Texture("Resources/Textures/Ground037/Ground037_Color.jpg", true);
+
+		m_BoundWallTexture = new Texture("Resources/Textures/BrickWall2/brick_wall2-diff.tga", true);
+		m_BoundWallSpecularTexture = new Texture("Resources/Textures/BrickWall2/brick_wall2-spec.tga", true);
+
+		m_LoglBoxTexture = new Texture("Resources/Textures/LearnOpenGL/container2.png", false);
+		m_LoglBoxSpecularTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
 	}
 
 	DemoScene::~DemoScene()
@@ -48,8 +53,13 @@ namespace LGE
 		delete m_LitColorShader;
 		delete m_LitTextureShader;
 
-		delete m_SmoothStoneTexture;
-		delete m_StoneTexture;
+		delete m_GroundTexture;
+
+		delete m_BoundWallTexture;
+		delete m_BoundWallSpecularTexture;
+
+		delete m_LoglBoxTexture;
+		delete m_LoglBoxSpecularTexture;
 	}
 
 	void DemoScene::Update(const float deltaTime)
@@ -136,23 +146,24 @@ namespace LGE
 		m_LitTextureShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
 		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
 		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
-		m_SmoothStoneTexture->Bind(0);
+		m_GroundTexture->Bind(0);
 		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
-		m_LitTextureShader->SetUniform2f("u_Tiling", 32.0f, 32.0f);
-		m_LitTextureShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
-		m_LitTextureShader->SetUniform1f("u_Material.shininess", 32.0f);
+		m_LitTextureShader->SetUniform2f("u_Tiling", m_GroundTiling, m_GroundTiling);
+		m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 0);
+		m_LitTextureShader->SetUniform1f("u_Material.specularIntensity", m_GroundSpecularIntensity);
+		m_LitTextureShader->SetUniform1f("u_Material.shininess", m_GroundShininess);
 
 		m_QuadVb->Bind();
 		m_BufferLayout->Attrib();
 
 		glm::mat4 groundModel = glm::mat4(1.0f);
 		groundModel = glm::rotate(groundModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		groundModel = glm::scale(groundModel, glm::vec3(32.0f));
+		groundModel = glm::scale(groundModel, glm::vec3(m_GroundScale));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", groundModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		// Tex block ---------------------------------------------------------------------------------------------------
+		// Bound walls -------------------------------------------------------------------------------------------------
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
 
@@ -163,15 +174,64 @@ namespace LGE
 		m_LitTextureShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
 		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
 		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
-		m_StoneTexture->Bind(0);
+		m_BoundWallTexture->Bind(0);
+		m_BoundWallSpecularTexture->Bind(1);
 		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
-		m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
-		m_LitTextureShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
-		m_LitTextureShader->SetUniform1f("u_Material.shininess", 32.0f);
+		m_LitTextureShader->SetUniform1i("u_Material.specularMap", 1);
+		m_LitTextureShader->SetUniform2f("u_Tiling", m_BoundWallTiling.x, m_BoundWallTiling.y);
+		m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 1);
+		m_LitTextureShader->SetUniform1f("u_Material.shininess", m_BoundWallShininess);
 
-		glm::mat4 blockModel = glm::mat4(1.0f);
-		blockModel = glm::translate(blockModel, glm::vec3(0.5f, 0.5f, 10.5f));
-		m_LitTextureShader->SetUniformMatrix4f("u_Model", blockModel);
+		// North
+		glm::mat4 wallModel = glm::mat4(1.0f);
+		wallModel = glm::translate(wallModel, glm::vec3(0.0f, m_BoundWallHeight / 2.0f, -m_GroundScale / 2.0f));
+		wallModel = glm::scale(wallModel, glm::vec3(m_GroundScale, m_BoundWallHeight, 0.2f));
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// South
+		wallModel = glm::mat4(1.0f);
+		wallModel = glm::translate(wallModel, glm::vec3(0.0f, m_BoundWallHeight / 2.0f, m_GroundScale / 2.0f));
+		wallModel = glm::scale(wallModel, glm::vec3(m_GroundScale, m_BoundWallHeight, 0.2f));
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// West
+		wallModel = glm::mat4(1.0f);
+		wallModel = glm::translate(wallModel, glm::vec3(-m_GroundScale / 2.0f, m_BoundWallHeight / 2.0f, 0.0f));
+		wallModel = glm::scale(wallModel, glm::vec3(0.2f, m_BoundWallHeight, m_GroundScale));
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// East
+		wallModel = glm::mat4(1.0f);
+		wallModel = glm::translate(wallModel, glm::vec3(m_GroundScale / 2.0f, m_BoundWallHeight / 2.0f, 0.0f));
+		wallModel = glm::scale(wallModel, glm::vec3(0.2f, m_BoundWallHeight, m_GroundScale));
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Logl box ----------------------------------------------------------------------------------------------------
+		m_CubeVb->Bind();
+		m_BufferLayout->Attrib();
+
+		m_LitTextureShader->Bind();
+		m_LitTextureShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
+		m_LitTextureShader->SetUniformMatrix4f("u_View", cameraView);
+		m_LitTextureShader->SetUniformMatrix4f("u_Projection", projection);
+		m_LitTextureShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
+		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
+		m_LoglBoxTexture->Bind(0);
+		m_LoglBoxSpecularTexture->Bind(1);
+		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
+		m_LitTextureShader->SetUniform1i("u_Material.specularMap", 1);
+		m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
+		m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 1);
+		m_LitTextureShader->SetUniform1f("u_Material.shininess", m_LoglBoxShininess);
+
+		glm::mat4 loglBoxModel = glm::mat4(1.0f);
+		loglBoxModel = glm::translate(loglBoxModel, m_LoglBoxPos);
+		m_LitTextureShader->SetUniformMatrix4f("u_Model", loglBoxModel);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
