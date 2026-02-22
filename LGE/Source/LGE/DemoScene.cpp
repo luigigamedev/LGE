@@ -152,31 +152,6 @@ namespace LGE
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		// Walls -------------------------------------------------------------------------------------------------------
-		m_LitColorShader->Bind();
-		m_LitColorShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
-		m_LitColorShader->SetUniformMatrix4f("u_View", cameraView);
-		m_LitColorShader->SetUniformMatrix4f("u_Projection", projection);
-		m_LitColorShader->SetUniform3f("u_AmbientColor", ambientColor.x, ambientColor.y, ambientColor.z);
-		m_LitColorShader->SetUniform3f("u_DirectionalLight.dir", directionalLightDir.x, directionalLightDir.y, directionalLightDir.z);
-		m_LitColorShader->SetUniform3f("u_DirectionalLight.color", directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
-		m_LitColorShader->SetUniform3f("u_Material.color", 1.0f, 1.0f, 1.0f);
-		m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.5f);
-		m_LitColorShader->SetUniform1f("u_Material.shininess", 32.0f);
-
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
-		
-		for (unsigned int i = 0; i < m_WallCount; i++)
-		{
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), m_WallsPos[i]);
-			model = glm::rotate(model, glm::radians(m_WallsYaw[i]), worldUp);
-			model = glm::scale(model, m_WallsScale[i]);
-			m_LitColorShader->SetUniformMatrix4f("u_Model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
 		// Tex block ---------------------------------------------------------------------------------------------------
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
