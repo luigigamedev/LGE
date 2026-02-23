@@ -17,6 +17,14 @@ namespace LGE
 		glm::vec3 Pos = glm::vec3(0.0f);
 		float Yaw = -90.0f; // TODO: initialize from forward; glm::vec3 Forward = glm::vec3(0.0f, 0.0f, -1.0f);
 		float Pitch = 0.0f;
+		
+		float Fov = 45.0f;
+		float AspectRatio = 800.0f / 600.0f;
+		float Near = 0.1f;
+		float Far = 100.0f;
+
+		glm::mat4 ViewMatrix = glm::mat4(1.0f);
+		glm::mat4 ProjectionMatrix = glm::mat4(1.0f);
 	};
 
 	struct Input 
@@ -53,6 +61,13 @@ namespace LGE
 		// Input
 		Input m_Input;
 
+		// Ambient
+		glm::vec3 m_AmbientColor = glm::vec3(0.05f, 0.05f, 0.07f);
+
+		// Directional light
+		glm::vec3 m_DirectionalLightDir = glm::vec3(-0.5f, -0.4f, -0.3f);
+		glm::vec3 m_DirectionalLightColor = glm::vec3(0.5f, 0.52f, 0.58f);
+
 		// Ground
 		float m_GroundScale = 32.0f;
 		Texture* m_GroundTexture = nullptr;
@@ -74,9 +89,13 @@ namespace LGE
 		float m_LoglBoxShininess = 32.0f;
 	public:
 		virtual void Update(const float deltaTime) override;
+		virtual void Render() override;
+	private:
 		void ReadMouseInput();
 		void ReadAxisInput();
-		virtual void Render() override;
 		glm::mat4 BuildCameraViewMatrix() const;
+		void RenderGround() const;
+		void RenderBoundWalls() const;
+		void RenderLoglBox() const;
 	};
 }
