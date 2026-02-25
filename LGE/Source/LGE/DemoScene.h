@@ -50,6 +50,7 @@ namespace LGE
 		// Shaders
 		ShaderProgram* m_LitColorShader = nullptr;
 		ShaderProgram* m_LitTextureShader = nullptr;
+		ShaderProgram* m_UnlitColorShader = nullptr;
 
 		// Player
 		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 5.0f); // Origin at the bottom (ground)
@@ -62,31 +63,30 @@ namespace LGE
 		Input m_Input;
 
 		// Ambient
-		glm::vec3 m_AmbientColor = glm::vec3(0.05f, 0.05f, 0.07f);
+		glm::vec3 m_AmbientColor = glm::vec3(0.02f, 0.02f, 0.03f); // nearly black, just enough to see shapes
 
 		// Directional light
 		glm::vec3 m_DirectionalLightDir = glm::vec3(-0.5f, -0.4f, -0.3f);
-		glm::vec3 m_DirectionalLightColor = glm::vec3(0.5f, 0.52f, 0.58f);
+		glm::vec3 m_DirectionalLightColor = glm::vec3(0.3f, 0.32f, 0.38f); // dim cold blue-white
+
+		// Point light
+		glm::vec3 m_PointLightPos = glm::vec3(0.0f, 0.97f, 0.0f);
+		// warm orange fire
+		glm::vec3 m_PointLightColor = glm::vec3(1.0f, 0.55f, 0.1f);
+		float m_PointLightLinear = 0.35f;   // ~13 unit range
+		float m_PointLightQuadratic = 0.44f;
 
 		// Ground
 		float m_GroundScale = 32.0f;
 		Texture* m_GroundTexture = nullptr;
-		float m_GroundTiling = 5.0f;
-		float m_GroundSpecularIntensity = 0.05f;
-		float m_GroundShininess = 8.0f;
 
 		// Bound walls
-		float m_BoundWallHeight = 2.0f;
 		Texture* m_BoundWallTexture = nullptr;
 		Texture* m_BoundWallSpecularTexture = nullptr;
-		glm::vec2 m_BoundWallTiling = glm::vec2(16.0f, 2.0f);
-		float m_BoundWallShininess = 32.0f;
 
 		// Logl box (used in learnopengl chapter 2)
-		glm::vec3 m_LoglBoxPos = glm::vec3(0.5f, 0.5f, 10.5f);
 		Texture* m_LoglBoxTexture = nullptr;
 		Texture* m_LoglBoxSpecularTexture = nullptr;
-		float m_LoglBoxShininess = 32.0f;
 	public:
 		virtual void Update(const float deltaTime) override;
 		virtual void Render() override;
@@ -97,5 +97,6 @@ namespace LGE
 		void RenderGround() const;
 		void RenderBoundWalls() const;
 		void RenderLoglBox() const;
+		void RenderTorch() const;
 	};
 }
