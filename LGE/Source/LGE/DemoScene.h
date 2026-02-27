@@ -90,6 +90,10 @@ namespace LGE
 
 		// Torches
 		std::vector<Torch> m_Torches;
+		glm::vec3 m_TorchOrangeColor = glm::vec3(1.0f, 0.55f, 0.1f);  // fire
+		glm::vec3 m_TorchBlueColor = glm::vec3(0.3f, 0.6f, 1.0f);  // cold magic
+		glm::vec3 m_TorchGreenColor = glm::vec3(0.2f, 1.0f, 0.3f);  // poison/nature
+		glm::vec3 m_TorchPurpleColor = glm::vec3(0.7f, 0.2f, 1.0f);  // arcane
 	public:
 		virtual void Update(const float deltaTime) override;
 		virtual void Render() override;
@@ -100,7 +104,7 @@ namespace LGE
 		void SetLightingUniforms(ShaderProgram* shader) const;
 		void RenderGround() const;
 		void RenderBoundWalls() const;
-		void RenderLoglBox() const;
+		void RenderLoglBoxes() const;
 		void RenderTorches() const;
 	};
 }

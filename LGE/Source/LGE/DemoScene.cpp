@@ -46,15 +46,14 @@ namespace LGE
 		m_LoglBoxSpecularTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
 
 		m_Torches.reserve(8);
-		glm::vec3 torchColor = glm::vec3(1.0f, 0.55f, 0.1f);
-		m_Torches.push_back({ glm::vec3(8.0f, 0.0f,  8.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f,  8.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(8.0f, 0.0f, -8.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f, -8.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(0.0f, 0.0f,  12.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(0.0f, 0.0f, -12.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(12.0f, 0.0f, 0.0f), torchColor });
-		m_Torches.push_back({ glm::vec3(-12.0f, 0.0f, 0.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(8.0f, 0.0f,  8.0f), m_TorchOrangeColor });
+		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f,  8.0f), m_TorchBlueColor });
+		m_Torches.push_back({ glm::vec3(8.0f, 0.0f, -8.0f), m_TorchGreenColor });
+		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f, -8.0f), m_TorchPurpleColor });
+		m_Torches.push_back({ glm::vec3(0.0f, 0.0f,  14.5f), m_TorchOrangeColor });
+		m_Torches.push_back({ glm::vec3(0.0f, 0.0f, -14.5f), m_TorchBlueColor });
+		m_Torches.push_back({ glm::vec3(14.5f, 0.0f, 0.0f),  m_TorchGreenColor });
+		m_Torches.push_back({ glm::vec3(-14.5f, 0.0f, 0.0f),  m_TorchPurpleColor });
 	}
 
 	DemoScene::~DemoScene()
@@ -89,7 +88,7 @@ namespace LGE
 		glm::vec3 playerForward = glm::normalize(glm::vec3(cos(glm::radians(m_PlayerYaw)), 0.0f, sin(glm::radians(m_PlayerYaw))));
 		constexpr glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
 		glm::vec3 playerRight = glm::normalize(glm::cross(playerForward, worldUp));
-		
+
 		if (m_Input.Axis != glm::vec2(0.0f))
 		{
 			constexpr float playerSpeed = 5.0f;
@@ -193,12 +192,12 @@ namespace LGE
 	void DemoScene::SetLightingUniforms(ShaderProgram* shader) const
 	{
 		shader->SetUniform3f("u_AmbientColor", m_AmbientColor.x, m_AmbientColor.y, m_AmbientColor.z);
-		
+
 		shader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
 		shader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
 
 		// TODO: Replace with point lights
-		for (int i = 0; i < m_Torches.size(); i++) 
+		for (int i = 0; i < m_Torches.size(); i++)
 		{
 			char name[64];
 
@@ -211,7 +210,7 @@ namespace LGE
 
 			snprintf(name, sizeof(name), "u_PointLights[%d].linear", i);
 			shader->SetUniform1f(name, 0.35f);
-		
+
 			snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", i);
 			shader->SetUniform1f(name, 0.44f);
 		}
@@ -223,7 +222,7 @@ namespace LGE
 	{
 		RenderGround();
 		RenderBoundWalls();
-		RenderLoglBox();
+		RenderLoglBoxes();
 		RenderTorches();
 	}
 
@@ -291,7 +290,7 @@ namespace LGE
 		// Geometry
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
-		 
+
 		// North
 		glm::mat4 wallModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, height / 2.0f, -m_GroundScale / 2.0f));
 		wallModel = glm::scale(wallModel, glm::vec3(m_GroundScale, height, 0.2f));
@@ -316,10 +315,18 @@ namespace LGE
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-	
-	void DemoScene::RenderLoglBox() const
+
+	void DemoScene::RenderLoglBoxes() const
 	{
-		constexpr glm::vec3 pos = glm::vec3(0.5f, 0.5f, 10.5f);
+		constexpr glm::vec3 boxesPos[] = {
+			glm::vec3(7.0f, 0.5f,  7.0f),
+			glm::vec3(-7.0f, 0.5f,  7.0f),
+			glm::vec3(7.0f, 0.5f, -7.0f),
+			glm::vec3(-7.0f, 0.5f, -7.0f),
+			glm::vec3(0.0f, 0.5f,  6.0f),
+			glm::vec3(0.0f, 0.5f, -6.0f),
+		};
+
 		constexpr float shininess = 32.0f;
 
 		m_LitTextureShader->Bind();
@@ -345,9 +352,12 @@ namespace LGE
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
 
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
-		m_LitTextureShader->SetUniformMatrix4f("u_Model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (auto& pos : boxesPos) 
+		{
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+			m_LitTextureShader->SetUniformMatrix4f("u_Model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 	}
 
 	void DemoScene::RenderTorches() const
@@ -360,10 +370,10 @@ namespace LGE
 		m_LitColorShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
 		m_LitColorShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
 		m_LitColorShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
-		
+
 		SetLightingUniforms(m_LitColorShader);
 
-		for (const Torch& torch : m_Torches) 
+		for (const Torch& torch : m_Torches)
 		{
 			glm::mat4 stickModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.4f, 0.0f));
 			stickModel = glm::scale(stickModel, glm::vec3(0.08f, 0.8f, 0.08f));
@@ -381,7 +391,7 @@ namespace LGE
 
 		for (const Torch& torch : m_Torches)
 		{
-			m_UnlitColorShader->SetUniform3f("u_Material.color", 1.0f, 0.55f, 0.1f);
+			m_UnlitColorShader->SetUniform3f("u_Material.color", torch.color.x, torch.color.y, torch.color.z);
 			glm::mat4 headModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.85f, 0.0f));
 			headModel = glm::scale(headModel, glm::vec3(0.12f, 0.12f, 0.12f));
 			m_UnlitColorShader->SetUniformMatrix4f("u_Model", headModel);
