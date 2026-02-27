@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <glm/glm.hpp>
 
 #include "Core/Core.h"
@@ -36,6 +37,12 @@ namespace LGE
 		glm::vec2 Axis = glm::vec2(0.0f); // x: horizontal, y: vertical
 	};
 
+	struct Torch 
+	{
+		glm::vec3 pos = glm::vec3(0.0f);
+		glm::vec3 color = glm::vec3(1.0f);
+	};
+
 	class LGE_API DemoScene : public Scene
 	{
 	public:
@@ -69,13 +76,6 @@ namespace LGE
 		glm::vec3 m_DirectionalLightDir = glm::vec3(-0.5f, -0.4f, -0.3f);
 		glm::vec3 m_DirectionalLightColor = glm::vec3(0.3f, 0.32f, 0.38f); // dim cold blue-white
 
-		// Point light
-		glm::vec3 m_PointLightPos = glm::vec3(0.0f, 0.97f, 0.0f);
-		// warm orange fire
-		glm::vec3 m_PointLightColor = glm::vec3(1.0f, 0.55f, 0.1f);
-		float m_PointLightLinear = 0.35f;   // ~13 unit range
-		float m_PointLightQuadratic = 0.44f;
-
 		// Ground
 		float m_GroundScale = 32.0f;
 		Texture* m_GroundTexture = nullptr;
@@ -87,6 +87,9 @@ namespace LGE
 		// Logl box (used in learnopengl chapter 2)
 		Texture* m_LoglBoxTexture = nullptr;
 		Texture* m_LoglBoxSpecularTexture = nullptr;
+
+		// Torches
+		std::vector<Torch> m_Torches;
 	public:
 		virtual void Update(const float deltaTime) override;
 		virtual void Render() override;
@@ -94,9 +97,10 @@ namespace LGE
 		void ReadMouseInput();
 		void ReadAxisInput();
 		glm::mat4 BuildCameraViewMatrix() const;
+		void SetLightingUniforms(ShaderProgram* shader) const;
 		void RenderGround() const;
 		void RenderBoundWalls() const;
 		void RenderLoglBox() const;
-		void RenderTorch() const;
+		void RenderTorches() const;
 	};
 }

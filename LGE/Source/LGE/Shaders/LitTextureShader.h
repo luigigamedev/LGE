@@ -33,6 +33,10 @@ namespace LGE::Shaders::LitTexture
 	constexpr const char* FRAGMENT = R"(
 		#version 330 core
 
+		#define MAX_POINT_LIGHTS 8
+
+		const float ATTENUATION_CONSTANT = 1.0;
+		
 		out vec4 f_Color;
 
 		in vec3 v_FragPos;
@@ -59,7 +63,6 @@ namespace LGE::Shaders::LitTexture
 		    vec3 pos;
 		    vec3 color;
 		    
-		    float constant;
 		    float linear;
 		    float quadratic;
 		};
@@ -67,12 +70,13 @@ namespace LGE::Shaders::LitTexture
 		uniform vec3 u_ViewPos;
 		uniform vec3 u_AmbientColor;
 		uniform DirectionalLight u_DirectionalLight;		
-		uniform PointLight u_PointLight;
+		uniform int u_PointLightCount;
+		uniform PointLight u_PointLights[MAX_POINT_LIGHTS];
 		uniform Material u_Material;
 		
 		// --- Function prototypes ---
 		vec3 CalcDirectionalLight(vec3 norm, vec3 viewDir, vec3 baseColor, vec3 specSurface);
-		vec3 CalcPointLight(vec3 norm, vec3 viewDir, vec3 baseColor, vec3 specSurface);
+		vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir, vec3 baseColor, vec3 specSurface);
 
 		void main()
 		{
@@ -89,9 +93,10 @@ namespace LGE::Shaders::LitTexture
 			vec3 ambient = u_AmbientColor * baseColor;
 
 			// --- Light contributions ---
-			vec3 result = ambient
-			    + CalcDirectionalLight(norm, viewDir, baseColor, specSurface)
-			    + CalcPointLight(norm, viewDir, baseColor, specSurface);
+			vec3 result = ambient + CalcDirectionalLight(norm, viewDir, baseColor, specSurface);
+			
+			for (int i = 0; i < u_PointLightCount; i++)
+				result += CalcPointLight(u_PointLights[i], norm, viewDir, baseColor, specSurface);
 
 			f_Color = vec4(result, 1.0);
 		}
@@ -111,20 +116,20 @@ namespace LGE::Shaders::LitTexture
 		    return diffuse + specular;
 		}
 		
-		vec3 CalcPointLight(vec3 norm, vec3 viewDir, vec3 baseColor, vec3 specSurface)
+		vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir, vec3 baseColor, vec3 specSurface)
 		{
-		    vec3 lightDir = normalize(u_PointLight.pos - v_FragPos);
+		    vec3 lightDir = normalize(light.pos - v_FragPos);
 		
 		    float diff = max(dot(norm, lightDir), 0.0);
 		
 		    vec3 reflectDir = reflect(-lightDir, norm);
 		    float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shininess);
 		
-		    float dist = length(u_PointLight.pos - v_FragPos);
-		    float attenuation = 1.0 / (u_PointLight.constant + u_PointLight.linear * dist + u_PointLight.quadratic * dist * dist);
+		    float dist = length(light.pos - v_FragPos);
+		    float attenuation = 1.0 / (ATTENUATION_CONSTANT + light.linear * dist + light.quadratic * dist * dist);
 		
-		    vec3 diffuse = u_PointLight.color * diff * baseColor * attenuation;
-		    vec3 specular = u_PointLight.color * specSurface * spec * attenuation;
+		    vec3 diffuse = light.color * diff * baseColor * attenuation;
+		    vec3 specular = light.color * specSurface * spec * attenuation;
 		
 		    return diffuse + specular;
 		}

@@ -1,6 +1,7 @@
 #include "DemoScene.h"
 
 #include <iostream>
+#include <cstdio>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h> // Included here only for input. Ideally all glfw should be handled only by Window class
@@ -43,6 +44,17 @@ namespace LGE
 
 		m_LoglBoxTexture = new Texture("Resources/Textures/LearnOpenGL/container2.png", false);
 		m_LoglBoxSpecularTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
+
+		m_Torches.reserve(8);
+		glm::vec3 torchColor = glm::vec3(1.0f, 0.55f, 0.1f);
+		m_Torches.push_back({ glm::vec3(8.0f, 0.0f,  8.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f,  8.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(8.0f, 0.0f, -8.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f, -8.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(0.0f, 0.0f,  12.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(0.0f, 0.0f, -12.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(12.0f, 0.0f, 0.0f), torchColor });
+		m_Torches.push_back({ glm::vec3(-12.0f, 0.0f, 0.0f), torchColor });
 	}
 
 	DemoScene::~DemoScene()
@@ -178,12 +190,41 @@ namespace LGE
 		return cameraView;
 	}
 
+	void DemoScene::SetLightingUniforms(ShaderProgram* shader) const
+	{
+		shader->SetUniform3f("u_AmbientColor", m_AmbientColor.x, m_AmbientColor.y, m_AmbientColor.z);
+		
+		shader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
+		shader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
+
+		// TODO: Replace with point lights
+		for (int i = 0; i < m_Torches.size(); i++) 
+		{
+			char name[64];
+
+			snprintf(name, sizeof(name), "u_PointLights[%d].pos", i);
+			glm::vec3 pos = m_Torches[i].pos + glm::vec3(0.0f, 0.97f, 0.0f);
+			shader->SetUniform3f(name, pos.x, pos.y, pos.z);
+
+			snprintf(name, sizeof(name), "u_PointLights[%d].color", i);
+			shader->SetUniform3f(name, m_Torches[i].color.x, m_Torches[i].color.y, m_Torches[i].color.z);
+
+			snprintf(name, sizeof(name), "u_PointLights[%d].linear", i);
+			shader->SetUniform1f(name, 0.35f);
+		
+			snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", i);
+			shader->SetUniform1f(name, 0.44f);
+		}
+
+		shader->SetUniform1i("u_PointLightCount", m_Torches.size());
+	}
+
 	void DemoScene::Render()
 	{
 		RenderGround();
 		RenderBoundWalls();
 		RenderLoglBox();
-		RenderTorch();
+		RenderTorches();
 	}
 
 	void DemoScene::RenderGround() const
@@ -200,14 +241,7 @@ namespace LGE
 		m_LitTextureShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
 
 		// Lights
-		m_LitTextureShader->SetUniform3f("u_AmbientColor", m_AmbientColor.x, m_AmbientColor.y, m_AmbientColor.z);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
-		m_LitTextureShader->SetUniform3f("u_PointLight.pos", m_PointLightPos.x, m_PointLightPos.y, m_PointLightPos.z);
-		m_LitTextureShader->SetUniform3f("u_PointLight.color", m_PointLightColor.x, m_PointLightColor.y, m_PointLightColor.z);
-		m_LitTextureShader->SetUniform1f("u_PointLight.constant", 1.0f);
-		m_LitTextureShader->SetUniform1f("u_PointLight.linear", m_PointLightLinear);
-		m_LitTextureShader->SetUniform1f("u_PointLight.quadratic", m_PointLightQuadratic);
+		SetLightingUniforms(m_LitTextureShader);
 
 		// Material
 		m_GroundTexture->Bind(0);
@@ -243,14 +277,7 @@ namespace LGE
 		m_LitTextureShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
 
 		// Lights
-		m_LitTextureShader->SetUniform3f("u_AmbientColor", m_AmbientColor.x, m_AmbientColor.y, m_AmbientColor.z);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
-		m_LitTextureShader->SetUniform3f("u_PointLight.pos", m_PointLightPos.x, m_PointLightPos.y, m_PointLightPos.z);
-		m_LitTextureShader->SetUniform3f("u_PointLight.color", m_PointLightColor.x, m_PointLightColor.y, m_PointLightColor.z);
-		m_LitTextureShader->SetUniform1f("u_PointLight.constant", 1.0f);
-		m_LitTextureShader->SetUniform1f("u_PointLight.linear", m_PointLightLinear);
-		m_LitTextureShader->SetUniform1f("u_PointLight.quadratic", m_PointLightQuadratic);
+		SetLightingUniforms(m_LitTextureShader);
 
 		// Material
 		m_BoundWallTexture->Bind(0);
@@ -303,14 +330,7 @@ namespace LGE
 		m_LitTextureShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
 
 		// Lights
-		m_LitTextureShader->SetUniform3f("u_AmbientColor", m_AmbientColor.x, m_AmbientColor.y, m_AmbientColor.z);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
-		m_LitTextureShader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
-		m_LitTextureShader->SetUniform3f("u_PointLight.pos", m_PointLightPos.x, m_PointLightPos.y, m_PointLightPos.z);
-		m_LitTextureShader->SetUniform3f("u_PointLight.color", m_PointLightColor.x, m_PointLightColor.y, m_PointLightColor.z);
-		m_LitTextureShader->SetUniform1f("u_PointLight.constant", 1.0f);
-		m_LitTextureShader->SetUniform1f("u_PointLight.linear", m_PointLightLinear);
-		m_LitTextureShader->SetUniform1f("u_PointLight.quadratic", m_PointLightQuadratic);
+		SetLightingUniforms(m_LitTextureShader);
 
 		// Material
 		m_LoglBoxTexture->Bind(0);
@@ -330,45 +350,42 @@ namespace LGE
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
-	void DemoScene::RenderTorch() const
+	void DemoScene::RenderTorches() const
 	{
 		m_CubeVb->Bind();
 		m_BufferLayout->Attrib();
 
+		// Sticks
 		m_LitColorShader->Bind();
-
-		// Camera
 		m_LitColorShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
 		m_LitColorShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
 		m_LitColorShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+		
+		SetLightingUniforms(m_LitColorShader);
 
-		// Lights
-		m_LitColorShader->SetUniform3f("u_AmbientColor", m_AmbientColor.x, m_AmbientColor.y, m_AmbientColor.z);
-		m_LitColorShader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
-		m_LitColorShader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
-		m_LitColorShader->SetUniform3f("u_PointLight.pos", m_PointLightPos.x, m_PointLightPos.y, m_PointLightPos.z);
-		m_LitColorShader->SetUniform3f("u_PointLight.color", m_PointLightColor.x, m_PointLightColor.y, m_PointLightColor.z);
-		m_LitColorShader->SetUniform1f("u_PointLight.constant", 1.0f);
-		m_LitColorShader->SetUniform1f("u_PointLight.linear", m_PointLightLinear);
-		m_LitColorShader->SetUniform1f("u_PointLight.quadratic", m_PointLightQuadratic);
+		for (const Torch& torch : m_Torches) 
+		{
+			glm::mat4 stickModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.4f, 0.0f));
+			stickModel = glm::scale(stickModel, glm::vec3(0.08f, 0.8f, 0.08f));
+			m_LitColorShader->SetUniform3f("u_Material.color", 0.45f, 0.3f, 0.15f);
+			m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.1f);
+			m_LitColorShader->SetUniform1f("u_Material.shininess", 8.0f);
+			m_LitColorShader->SetUniformMatrix4f("u_Model", stickModel);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
-		// Stick
-		glm::mat4 stickModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.4f, 0.0f));
-		stickModel = glm::scale(stickModel, glm::vec3(0.08f, 0.8f, 0.08f));
-		m_LitColorShader->SetUniform3f("u_Material.color", 0.45f, 0.3f, 0.15f);
-		m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.1f);
-		m_LitColorShader->SetUniform1f("u_Material.shininess", 8.0f);
-		m_LitColorShader->SetUniformMatrix4f("u_Model", stickModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Head (on state) — unlit, emissive orange
+		// Heads
 		m_UnlitColorShader->Bind();
 		m_UnlitColorShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
 		m_UnlitColorShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
-		m_UnlitColorShader->SetUniform3f("u_Material.color", m_PointLightColor.x, m_PointLightColor.y, m_PointLightColor.z);
-		glm::mat4 headModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.85f, 0.0f));
-		headModel = glm::scale(headModel, glm::vec3(0.12f, 0.12f, 0.12f));
-		m_UnlitColorShader->SetUniformMatrix4f("u_Model", headModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		for (const Torch& torch : m_Torches)
+		{
+			m_UnlitColorShader->SetUniform3f("u_Material.color", 1.0f, 0.55f, 0.1f);
+			glm::mat4 headModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.85f, 0.0f));
+			headModel = glm::scale(headModel, glm::vec3(0.12f, 0.12f, 0.12f));
+			m_UnlitColorShader->SetUniformMatrix4f("u_Model", headModel);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 	}
 }
