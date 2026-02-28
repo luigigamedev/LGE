@@ -109,7 +109,8 @@ namespace LGE
 
 		// View and projection -----------------------------------------------------------------------------------------
 		m_Camera.ViewMatrix = BuildCameraViewMatrix();
-		m_Camera.ProjectionMatrix = glm::perspective(glm::radians(m_Camera.Fov), m_Camera.AspectRatio, m_Camera.Near, m_Camera.Far);
+		float aspectRatio = (float)Application::Get().GetWindowWidth() / (float)Application::Get().GetWindowHeight();
+		m_Camera.ProjectionMatrix = glm::perspective(glm::radians(m_Camera.Fov), aspectRatio, m_Camera.Near, m_Camera.Far);
 	}
 
 	void DemoScene::ReadAxisInput()

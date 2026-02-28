@@ -9,16 +9,17 @@ namespace LGE
 	class Window 
 	{
 	private:
+		unsigned int m_Width;
+		unsigned int m_Height;
 		GLFWwindow* m_GlfwWindow = nullptr;
-		double m_MouseX;
-		double m_MouseY;
+		double m_MouseX = 0.0;
+		double m_MouseY = 0.0;
 	public:
-		Window(const std::string& title = "Learn Game Engine",
-			unsigned int width = 800,
-			unsigned int height = 600);
+		Window(unsigned int width, unsigned int height, const std::string& title, bool fullscreen);
 		~Window();
 
-		GLFWwindow* GetGlfwWindow() { return m_GlfwWindow; }
+		unsigned int GetWidth() const { return m_Width; }
+		unsigned int GetHeight() const { return m_Height; }
 
 		bool ShouldClose() const;
 

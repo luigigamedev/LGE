@@ -19,7 +19,7 @@ namespace LGE
 		// TODO: Assert there is only one instance of Application
 		s_Instance = this;
 
-		m_Window = new Window();
+		m_Window = new Window(800, 600, "LGE", true);
 		// TODO: Move graphics context away from window
 	}
 
@@ -90,5 +90,15 @@ namespace LGE
 	double Application::GetMouseY() const
 	{
 		return m_Window->GetMouseY();
+	}
+
+	unsigned int Application::GetWindowWidth() const
+	{
+		return m_Window->GetWidth();
+	}
+
+	unsigned int Application::GetWindowHeight() const
+	{
+		return m_Window->GetHeight();
 	}
 }

@@ -20,7 +20,6 @@ namespace LGE
 		float Pitch = 0.0f;
 		
 		float Fov = 45.0f;
-		float AspectRatio = 800.0f / 600.0f;
 		float Near = 0.1f;
 		float Far = 100.0f;
 

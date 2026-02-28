@@ -7,7 +7,7 @@
 
 namespace LGE 
 {
-	Window::Window(const std::string& title, unsigned int width, unsigned int height)
+	Window::Window(unsigned int width, unsigned int height, const std::string& title, bool fullscreen)
 	{
 		std::cout << "[Window] Window(){" << '\n';
 		
@@ -20,7 +20,19 @@ namespace LGE
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		m_GlfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+		GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* primaryMonitorMode = glfwGetVideoMode(primaryMonitor);
+
+		if (fullscreen)
+		{
+			width = primaryMonitorMode->width;
+			height = primaryMonitorMode->height;
+		}
+
+		m_Width = width;
+		m_Height = height;
+
+		m_GlfwWindow = glfwCreateWindow(width, height, title.c_str(), fullscreen ? primaryMonitor : NULL, NULL);
 
 		if (!m_GlfwWindow)
 		{
@@ -31,8 +43,10 @@ namespace LGE
 
 		glfwMakeContextCurrent(m_GlfwWindow);
 
-		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowPos(m_GlfwWindow, (mode->width - width) / 2, (mode->height - height) / 2);
+		if (!fullscreen) 
+		{
+			glfwSetWindowPos(m_GlfwWindow, (primaryMonitorMode->width - width) / 2, (primaryMonitorMode->height - height) / 2);
+		}
 		
 		// Hides and grabs the cursor, providing virtual and unlimited cursor movement
 		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
