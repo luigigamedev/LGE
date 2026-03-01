@@ -9,8 +9,8 @@ namespace LGE
 	class Window 
 	{
 	private:
-		unsigned int m_Width;
-		unsigned int m_Height;
+		unsigned int m_Width = 0;
+		unsigned int m_Height = 0;
 		GLFWwindow* m_GlfwWindow = nullptr;
 		double m_MouseX = 0.0;
 		double m_MouseY = 0.0;

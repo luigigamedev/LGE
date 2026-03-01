@@ -47,13 +47,24 @@ namespace LGE
                 internalFormat = GL_RGB8;
                 dataFormat = GL_RGB;
             }
+            else if (m_Channels == 1)
+            {
+                internalFormat = GL_R8;
+                dataFormat = GL_RED;
+            }
+            else
+            {
+                std::cout << "[WARN] [Texture] Unsupported channel count: " << m_Channels << " (" << path << ")\n";
+            }
             
             glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
+
+            std::cout << "[INFO] [Texture] Loaded: " << path << " (" << m_Width << "x" << m_Height << " " << m_Channels << "ch)\n";
         }
         else
         {
-            std::cout << "Failed to load texture" << std::endl;
+            std::cout << "[WARN] [Texture] Failed to load: " << path << '\n';
         }
 
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind

@@ -76,7 +76,7 @@ namespace LGE
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
 			glGetProgramInfoLog(program, length, &length, message);
-			std::cout << "Failed to link shader program: " << name << std::endl;
+			std::cout << "[ERROR] [ShaderProgram] Failed to link shader program: " << name << std::endl;
 			std::cout << message << std::endl;
 			glDeleteProgram(program);
 			glDeleteShader(vs);
@@ -85,6 +85,8 @@ namespace LGE
 		}
 
 		glValidateProgram(program);
+
+		std::cout << "[INFO] [ShaderProgram] Compiled: " << name << "\n";
 
 		glDeleteShader(vs);
 		glDeleteShader(fs);
@@ -107,7 +109,7 @@ namespace LGE
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
 			glGetShaderInfoLog(id, length, &length, message);
-			std::cout << "Failed to compile " << name << " "
+			std::cout << "[ERROR] [ShaderProgram] Failed to compile " << name << " "
 				<< (type == GL_VERTEX_SHADER ? "vertex" : "fragment")
 				<< " shader" << std::endl;
 			std::cout << message << std::endl;

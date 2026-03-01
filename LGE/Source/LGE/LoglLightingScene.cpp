@@ -21,8 +21,6 @@ namespace LGE
 {
 	LoglLightingScene::LoglLightingScene()
 	{
-		std::cout << "[LoglLightingScene] LoglLightingScene(){" << '\n';
-
 		// LOAD RESOURCES ----------------------------------------------------------------------------------------------
 		m_DiffuseMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2.png", false);
 		m_SpecularMapTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
@@ -41,8 +39,6 @@ namespace LGE
 
 	LoglLightingScene::~LoglLightingScene()
 	{
-		std::cout << "[LoglLightingScene] ~LoglLightingScene(){" << '\n';
-
 		delete m_DiffuseMapTexture;
 		delete m_SpecularMapTexture;
 		
@@ -51,8 +47,6 @@ namespace LGE
 
 		delete m_CubeVb;
 		delete m_BufferLayout;
-
-		std::cout << "[LoglLightingScene] ~LoglLightingScene()}" << '\n';
 	}
 
 	void LoglLightingScene::Update(const float deltaTime)

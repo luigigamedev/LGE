@@ -83,7 +83,7 @@ namespace LGE::Shaders::LitTexture
 			// --- Shared surface data, computed once ---
 			vec3 baseColor  = vec3(texture(u_Material.diffuseMap, v_TexCoords));
 			vec3 specSurface = u_Material.useSpecularMap 
-			    ? vec3(texture(u_Material.specularMap, v_TexCoords)) 
+			    ? vec3(texture(u_Material.specularMap, v_TexCoords).r)
 			    : vec3(u_Material.specularIntensity);
 
 			vec3 norm = normalize(v_Normal);

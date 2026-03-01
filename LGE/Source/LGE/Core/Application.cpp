@@ -14,22 +14,20 @@ namespace LGE
 	Application::Application()
 		: m_Window(nullptr), m_ActiveScene(nullptr)
 	{
-		std::cout << "[Application] Application(){" << '\n';
-
 		// TODO: Assert there is only one instance of Application
 		s_Instance = this;
 
 		m_Window = new Window(800, 600, "LGE", true);
 		// TODO: Move graphics context away from window
+		
+		std::cout << "[INFO] [Application] Created" << '\n';
 	}
 
 	Application::~Application()
 	{
-		std::cout << "[Application] ~Application(){" << '\n';
+		std::cout << "[INFO] [Application] Destroyed" << '\n';
 
 		delete m_Window;
-
-		std::cout << "[Application] ~Application()}" << '\n';
 	}
 
 	void Application::ActivateScene(Scene* scene)

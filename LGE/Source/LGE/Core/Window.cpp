@@ -8,13 +8,11 @@
 namespace LGE 
 {
 	Window::Window(unsigned int width, unsigned int height, const std::string& title, bool fullscreen)
-	{
-		std::cout << "[Window] Window(){" << '\n';
-		
+	{	
 		// Initialize Glfw
 		if (!glfwInit())
 		{
-			std::cout << "[Window] ERROR: Failed initializing GLFW." << '\n';
+			std::cout << "[ERROR] [Window] Failed initializing GLFW" << '\n';
 			return;
 		}
 
@@ -36,7 +34,7 @@ namespace LGE
 
 		if (!m_GlfwWindow)
 		{
-			std::cout << "[Window] ERROR: Failed creating GLFW window." << '\n';
+			std::cout << "[ERROR] [Window] Failed creating GLFW window" << '\n';
 			glfwTerminate();
 			return;
 		}
@@ -54,11 +52,9 @@ namespace LGE
 		// glad: load all OpenGL function pointers
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
-			std::cout << "[Window] ERROR: Failed to initialize GLAD" << '\n';
+			std::cout << "[ERROR] [Window] Failed to initialize GLAD" << '\n';
 			return;
 		}
-
-		std::cout << "[Window] " << glGetString(GL_VERSION) << '\n';
 
 		// Configure global opengl state
 		glEnable(GL_DEPTH_TEST);
@@ -67,16 +63,17 @@ namespace LGE
 		glFrontFace(GL_CCW); // Defines what counts as a front face, counter-clockwise vertex order (default)
 		
 		glViewport(0, 0, width, height);
+
+		std::cout << "[INFO] [Window] Created " << width << "x" << height << (fullscreen ? " fullscreen" : " windowed") << '\n';
+		std::cout << "[INFO] [Window] OpenGL " << glGetString(GL_VERSION) << '\n';
 	}
 	
 	Window::~Window()
 	{
-		std::cout << "[Window] ~Window(){" << '\n';
+		std::cout << "[INFO] [Window] Destroyed" << '\n';
 
 		glfwDestroyWindow(m_GlfwWindow);
 		glfwTerminate();
-
-		std::cout << "[Window] ~Window()}" << '\n';
 	}
 
 	bool Window::ShouldClose() const
