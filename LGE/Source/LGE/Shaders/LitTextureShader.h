@@ -33,7 +33,7 @@ namespace LGE::Shaders::LitTexture
 	constexpr const char* FRAGMENT = R"(
 		#version 330 core
 
-		#define MAX_POINT_LIGHTS 8
+		#define MAX_POINT_LIGHTS 8 // NOTE: Must match Scene::MAX_POINT_LIGHTS in Scene.h
 
 		const float ATTENUATION_CONSTANT = 1.0;
 		

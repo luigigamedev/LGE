@@ -10,6 +10,8 @@ namespace LGE
 	{
 	protected:
 		static constexpr glm::vec3 WORLD_UP = glm::vec3(0.0f, 1.0f, 0.0f);
+
+		// NOTE: MAX_POINT_LIGHTS must match #define MAX_POINT_LIGHTS in shaders
 		static constexpr int MAX_POINT_LIGHTS = 8;
 
 	public:

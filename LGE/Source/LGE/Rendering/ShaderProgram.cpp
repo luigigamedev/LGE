@@ -7,10 +7,10 @@
 
 namespace LGE
 {
-	ShaderProgram::ShaderProgram(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc)
+	ShaderProgram::ShaderProgram(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc, const std::string& name)
 		: m_Id(0)
 	{
-		m_Id = CreateShader(vertexShaderSrc, fragmentShaderSrc);
+		m_Id = CreateShader(vertexShaderSrc, fragmentShaderSrc, name);
 	}
 
 	ShaderProgram::~ShaderProgram()
@@ -58,15 +58,32 @@ namespace LGE
 		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	unsigned int ShaderProgram::CreateShader(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc)
+	unsigned int ShaderProgram::CreateShader(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc, const std::string& name)
 	{
 		unsigned int program = glCreateProgram();
-		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc);
-		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
+		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc, name);
+		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc, name);
 
 		glAttachShader(program, vs);
 		glAttachShader(program, fs);
 		glLinkProgram(program);
+
+		int result;
+		glGetProgramiv(program, GL_LINK_STATUS, &result);
+		if (result == GL_FALSE)
+		{
+			int length;
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+			char* message = (char*)_malloca(length * sizeof(char));
+			glGetProgramInfoLog(program, length, &length, message);
+			std::cout << "Failed to link shader program: " << name << std::endl;
+			std::cout << message << std::endl;
+			glDeleteProgram(program);
+			glDeleteShader(vs);
+			glDeleteShader(fs);
+			return 0;
+		}
+
 		glValidateProgram(program);
 
 		glDeleteShader(vs);
@@ -75,7 +92,7 @@ namespace LGE
 		return program;
 	}
 
-	unsigned int ShaderProgram::CompileShader(unsigned int type, const std::string& src)
+	unsigned int ShaderProgram::CompileShader(unsigned int type, const std::string& src, const std::string& name)
 	{
 		unsigned int id = glCreateShader(type);
 		const char* cSrc = src.c_str();
@@ -90,7 +107,7 @@ namespace LGE
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
 			glGetShaderInfoLog(id, length, &length, message);
-			std::cout << "Failed to compile "
+			std::cout << "Failed to compile " << name << " "
 				<< (type == GL_VERTEX_SHADER ? "vertex" : "fragment")
 				<< " shader" << std::endl;
 			std::cout << message << std::endl;

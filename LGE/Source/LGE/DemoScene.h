@@ -101,6 +101,7 @@ namespace LGE
 		void ReadAxisInput();
 		glm::mat4 BuildCameraViewMatrix() const;
 		void SetLightingUniforms(ShaderProgram* shader) const;
+		void SetCameraUniforms(ShaderProgram* shader) const;
 		void RenderGround() const;
 		void RenderBoundWalls() const;
 		void RenderLoglBoxes() const;

@@ -31,9 +31,9 @@ namespace LGE
 		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
 		m_CubeVb = new VertexBuffer(Meshes::CUBE, sizeof(Meshes::CUBE));
 
-		m_LitColorShader = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT);
-		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT);
-		m_UnlitColorShader = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT);
+		m_LitColorShader = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT, "LitColor");
+		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT, "LitTexture");
+		m_UnlitColorShader = new ShaderProgram(Shaders::UnlitColor::VERTEX, Shaders::UnlitColor::FRAGMENT, "UnlitColor");
 
 		m_Camera.Pos = glm::vec3(0.0f, 1.7f, 0.0f);
 
@@ -219,6 +219,13 @@ namespace LGE
 		shader->SetUniform1i("u_PointLightCount", m_Torches.size());
 	}
 
+	void DemoScene::SetCameraUniforms(ShaderProgram* shader) const
+	{
+		shader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
+		shader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
+		shader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+	}
+
 	void DemoScene::Render()
 	{
 		RenderGround();
@@ -236,9 +243,7 @@ namespace LGE
 		m_LitTextureShader->Bind();
 
 		// Camera
-		m_LitTextureShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
-		m_LitTextureShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
-		m_LitTextureShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+		SetCameraUniforms(m_LitTextureShader);
 
 		// Lights
 		SetLightingUniforms(m_LitTextureShader);
@@ -272,9 +277,7 @@ namespace LGE
 		m_LitTextureShader->Bind();
 
 		// Camera
-		m_LitTextureShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
-		m_LitTextureShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
-		m_LitTextureShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+		SetCameraUniforms(m_LitTextureShader);
 
 		// Lights
 		SetLightingUniforms(m_LitTextureShader);
@@ -333,9 +336,7 @@ namespace LGE
 		m_LitTextureShader->Bind();
 
 		// Camera
-		m_LitTextureShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
-		m_LitTextureShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
-		m_LitTextureShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+		SetCameraUniforms(m_LitTextureShader);
 
 		// Lights
 		SetLightingUniforms(m_LitTextureShader);
@@ -363,16 +364,15 @@ namespace LGE
 
 	void DemoScene::RenderTorches() const
 	{
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
-
 		// Sticks
 		m_LitColorShader->Bind();
-		m_LitColorShader->SetUniform3f("u_ViewPos", m_Camera.Pos.x, m_Camera.Pos.y, m_Camera.Pos.z);
-		m_LitColorShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
-		m_LitColorShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+		
+		SetCameraUniforms(m_LitColorShader);
 
 		SetLightingUniforms(m_LitColorShader);
+
+		m_CubeVb->Bind();
+		m_BufferLayout->Attrib();
 
 		for (const Torch& torch : m_Torches)
 		{
@@ -387,8 +387,11 @@ namespace LGE
 
 		// Heads
 		m_UnlitColorShader->Bind();
-		m_UnlitColorShader->SetUniformMatrix4f("u_View", m_Camera.ViewMatrix);
-		m_UnlitColorShader->SetUniformMatrix4f("u_Projection", m_Camera.ProjectionMatrix);
+
+		SetCameraUniforms(m_UnlitColorShader);
+
+		m_CubeVb->Bind();
+		m_BufferLayout->Attrib();
 
 		for (const Torch& torch : m_Torches)
 		{
