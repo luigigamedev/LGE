@@ -8,9 +8,9 @@
 
 namespace LGE
 {
-	class BufferLayout;
 	class ShaderProgram;
 	class Texture;
+	class VertexArray;
 	class VertexBuffer;
 
 	struct Camera
@@ -48,10 +48,11 @@ namespace LGE
 		DemoScene();
 		~DemoScene() override;
 	private:
-		// Buffer Layout and Meshes
-		BufferLayout* m_BufferLayout = nullptr;
+		// Meshes
 		VertexBuffer* m_QuadVb = nullptr;
 		VertexBuffer* m_CubeVb = nullptr;
+		VertexArray* m_QuadVao = nullptr;
+		VertexArray* m_CubeVao = nullptr;
 
 		// Shaders
 		ShaderProgram* m_LitColorShader = nullptr;

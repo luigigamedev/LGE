@@ -14,6 +14,7 @@
 #include "Rendering/Meshes.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
+#include "Rendering/VertexArray.h"
 #include "Rendering/VertexBuffer.h"
 #include "Shaders/LitColorShader.h"
 #include "Shaders/LitTextureShader.h"
@@ -23,13 +24,16 @@ namespace LGE
 {
 	DemoScene::DemoScene()
 	{
-		m_BufferLayout = new BufferLayout();
-		m_BufferLayout->PushFloat3(); // position attribute
-		m_BufferLayout->PushFloat3(); // normal attribute
-		m_BufferLayout->PushFloat2(); // tex coord attribute
-
 		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
 		m_CubeVb = new VertexBuffer(Meshes::CUBE, sizeof(Meshes::CUBE));
+
+		BufferLayout layout;
+		layout.PushFloat3(); // position
+		layout.PushFloat3(); // normal
+		layout.PushFloat2(); // texcoord
+
+		m_QuadVao = new VertexArray(*m_QuadVb, layout);
+		m_CubeVao = new VertexArray(*m_CubeVb, layout);
 
 		m_LitColorShader = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT, "LitColor");
 		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT, "LitTexture");
@@ -58,8 +62,8 @@ namespace LGE
 
 	DemoScene::~DemoScene()
 	{
-		delete m_BufferLayout;
-
+		delete m_QuadVao;
+		delete m_CubeVao;
 		delete m_QuadVb;
 		delete m_CubeVb;
 
@@ -216,7 +220,7 @@ namespace LGE
 			shader->SetUniform1f(name, 0.44f);
 		}
 
-		shader->SetUniform1i("u_PointLightCount", m_Torches.size());
+		shader->SetUniform1i("u_PointLightCount", (int)m_Torches.size());
 	}
 
 	void DemoScene::SetCameraUniforms(ShaderProgram* shader) const
@@ -257,8 +261,7 @@ namespace LGE
 		m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
 
 		// Geometry
-		m_QuadVb->Bind();
-		m_BufferLayout->Attrib();
+		m_QuadVao->Bind();
 
 		glm::mat4 groundModel = glm::mat4(1.0f);
 		groundModel = glm::rotate(groundModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -292,8 +295,7 @@ namespace LGE
 		m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
 
 		// Geometry
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
+		m_CubeVao->Bind();
 
 		// North
 		glm::mat4 wallModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, height / 2.0f, -m_GroundScale / 2.0f));
@@ -351,8 +353,7 @@ namespace LGE
 		m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
 
 		// Geometry
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
+		m_CubeVao->Bind();
 
 		for (auto& pos : boxesPos) 
 		{
@@ -371,8 +372,7 @@ namespace LGE
 
 		SetLightingUniforms(m_LitColorShader);
 
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
+		m_CubeVao->Bind();
 
 		for (const Torch& torch : m_Torches)
 		{
@@ -390,8 +390,7 @@ namespace LGE
 
 		SetCameraUniforms(m_UnlitColorShader);
 
-		m_CubeVb->Bind();
-		m_BufferLayout->Attrib();
+		m_CubeVao->Bind();
 
 		for (const Torch& torch : m_Torches)
 		{
