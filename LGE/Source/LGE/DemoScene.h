@@ -8,6 +8,7 @@
 
 namespace LGE
 {
+	class IndexBuffer;
 	class ShaderProgram;
 	class Texture;
 	class VertexArray;
@@ -49,10 +50,12 @@ namespace LGE
 		~DemoScene() override;
 	private:
 		// Meshes
-		VertexBuffer* m_QuadVb = nullptr;
-		VertexBuffer* m_CubeVb = nullptr;
 		VertexArray* m_QuadVao = nullptr;
 		VertexArray* m_CubeVao = nullptr;
+		IndexBuffer* m_QuadIb = nullptr;
+		IndexBuffer* m_CubeIb = nullptr;
+		VertexBuffer* m_QuadVb = nullptr;
+		VertexBuffer* m_CubeVb = nullptr;
 
 		// Shaders
 		ShaderProgram* m_LitColorShader = nullptr;

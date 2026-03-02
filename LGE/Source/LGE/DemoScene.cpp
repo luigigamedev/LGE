@@ -10,12 +10,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Core/Application.h"
-#include "Rendering/BufferLayout.h"
+#include "Rendering/IndexBuffer.h"
 #include "Rendering/Meshes.h"
 #include "Rendering/ShaderProgram.h"
 #include "Rendering/Texture.h"
 #include "Rendering/VertexArray.h"
 #include "Rendering/VertexBuffer.h"
+#include "Rendering/VertexBufferLayout.h"
 #include "Shaders/LitColorShader.h"
 #include "Shaders/LitTextureShader.h"
 #include "Shaders/UnlitColorShader.h"
@@ -24,16 +25,18 @@ namespace LGE
 {
 	DemoScene::DemoScene()
 	{
-		m_QuadVb = new VertexBuffer(Meshes::QUAD, sizeof(Meshes::QUAD));
-		m_CubeVb = new VertexBuffer(Meshes::CUBE, sizeof(Meshes::CUBE));
+		m_QuadVb = new VertexBuffer(Meshes::QUAD_VERTICES, sizeof(Meshes::QUAD_VERTICES));
+		m_CubeVb = new VertexBuffer(Meshes::CUBE_VERTICES, sizeof(Meshes::CUBE_VERTICES));
+		m_QuadIb = new IndexBuffer(Meshes::QUAD_INDICES, Meshes::QUAD_INDEX_COUNT);
+		m_CubeIb = new IndexBuffer(Meshes::CUBE_INDICES, Meshes::CUBE_INDEX_COUNT);
 
-		BufferLayout layout;
+		VertexBufferLayout layout;
 		layout.PushFloat3(); // position
 		layout.PushFloat3(); // normal
 		layout.PushFloat2(); // texcoord
 
-		m_QuadVao = new VertexArray(*m_QuadVb, layout);
-		m_CubeVao = new VertexArray(*m_CubeVb, layout);
+		m_QuadVao = new VertexArray(*m_QuadVb, *m_QuadIb, layout);
+		m_CubeVao = new VertexArray(*m_CubeVb, *m_CubeIb, layout);
 
 		m_LitColorShader = new ShaderProgram(Shaders::LitColor::VERTEX, Shaders::LitColor::FRAGMENT, "LitColor");
 		m_LitTextureShader = new ShaderProgram(Shaders::LitTexture::VERTEX, Shaders::LitTexture::FRAGMENT, "LitTexture");
@@ -64,6 +67,8 @@ namespace LGE
 	{
 		delete m_QuadVao;
 		delete m_CubeVao;
+		delete m_QuadIb;
+		delete m_CubeIb;
 		delete m_QuadVb;
 		delete m_CubeVb;
 
@@ -268,7 +273,7 @@ namespace LGE
 		groundModel = glm::scale(groundModel, glm::vec3(m_GroundScale));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", groundModel);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawElements(GL_TRIANGLES, m_QuadIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void DemoScene::RenderBoundWalls() const
@@ -301,25 +306,25 @@ namespace LGE
 		glm::mat4 wallModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, height / 2.0f, -m_GroundScale / 2.0f));
 		wallModel = glm::scale(wallModel, glm::vec3(m_GroundScale, height, 0.2f));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 		// South
 		wallModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, height / 2.0f, m_GroundScale / 2.0f));
 		wallModel = glm::scale(wallModel, glm::vec3(m_GroundScale, height, 0.2f));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 		// West
 		wallModel = glm::translate(glm::mat4(1.0f), glm::vec3(-m_GroundScale / 2.0f, height / 2.0f, 0.0f));
 		wallModel = glm::scale(wallModel, glm::vec3(0.2f, height, m_GroundScale));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 		// East
 		wallModel = glm::translate(glm::mat4(1.0f), glm::vec3(m_GroundScale / 2.0f, height / 2.0f, 0.0f));
 		wallModel = glm::scale(wallModel, glm::vec3(0.2f, height, m_GroundScale));
 		m_LitTextureShader->SetUniformMatrix4f("u_Model", wallModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void DemoScene::RenderLoglBoxes() const
@@ -359,7 +364,7 @@ namespace LGE
 		{
 			glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
 			m_LitTextureShader->SetUniformMatrix4f("u_Model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 	}
 
@@ -382,7 +387,7 @@ namespace LGE
 			m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.1f);
 			m_LitColorShader->SetUniform1f("u_Material.shininess", 8.0f);
 			m_LitColorShader->SetUniformMatrix4f("u_Model", stickModel);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 
 		// Heads
@@ -398,7 +403,7 @@ namespace LGE
 			glm::mat4 headModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.85f, 0.0f));
 			headModel = glm::scale(headModel, glm::vec3(0.12f, 0.12f, 0.12f));
 			m_UnlitColorShader->SetUniformMatrix4f("u_Model", headModel);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 	}
 }
