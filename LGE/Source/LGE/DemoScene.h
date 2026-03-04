@@ -50,6 +50,11 @@ namespace LGE
 		glm::vec3 color = glm::vec3(1.0f);
 	};
 
+	struct Campfire
+	{
+		Transform Transform = { glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f) };
+	};
+
 	class LGE_API DemoScene : public Scene
 	{
 	public:
@@ -97,7 +102,6 @@ namespace LGE
 		// Logl box (used in learnopengl chapter 2)
 		Texture* m_LoglBoxTexture = nullptr;
 		Texture* m_LoglBoxSpecularTexture = nullptr;
-		Transform m_LoglBoxTransform = { glm::vec3(0.0f), glm::vec3(0.0f, 90.0f, 0.0f) , glm::vec3(1.0f) };
 
 		// Torches
 		std::vector<Torch> m_Torches;
@@ -105,6 +109,9 @@ namespace LGE
 		glm::vec3 m_TorchBlueColor = glm::vec3(0.3f, 0.6f, 1.0f);  // cold magic
 		glm::vec3 m_TorchGreenColor = glm::vec3(0.2f, 1.0f, 0.3f);  // poison/nature
 		glm::vec3 m_TorchPurpleColor = glm::vec3(0.7f, 0.2f, 1.0f);  // arcane
+
+		// Campfire
+		Campfire m_Campfire;
 	public:
 		virtual void Update(const float deltaTime) override;
 		virtual void Render() override;
@@ -119,5 +126,6 @@ namespace LGE
 		void RenderBoundWalls() const;
 		void RenderLoglBoxes() const;
 		void RenderTorches() const;
+		void RenderCampfire(const Campfire& campfire) const;
 	};
 }

@@ -113,14 +113,8 @@ namespace LGE
 		if (m_Camera.Pitch < -89.0f)
 			m_Camera.Pitch = -89.0f;
 
-		// Rotations test boxes ----------------------------------------------------------------------------------------
 		constexpr float playerHeight = 1.7f;
 		m_Camera.Pos = m_PlayerPos + glm::vec3(0.0f, playerHeight, 0.0f);
-
-		if (Application::Get().GetKey(GLFW_KEY_UP) == 1)
-			m_LoglBoxTransform.Rot.x += 1.0f;
-		else if (Application::Get().GetKey(GLFW_KEY_DOWN) == 1)
-			m_LoglBoxTransform.Rot.x -= 1.0f;
 
 		// View and projection -----------------------------------------------------------------------------------------
 		m_Camera.ViewMatrix = BuildCameraViewMatrix();
@@ -266,6 +260,7 @@ namespace LGE
 		RenderBoundWalls();
 		RenderLoglBoxes();
 		RenderTorches();
+		RenderCampfire(m_Campfire);
 	}
 
 	void DemoScene::RenderGround() const
@@ -354,32 +349,32 @@ namespace LGE
 
 	void DemoScene::RenderLoglBoxes() const
 	{
-		constexpr float shininess = 32.0f;
+		//constexpr float shininess = 32.0f;
 
-		m_LitTextureShader->Bind();
+		//m_LitTextureShader->Bind();
 
-		// Camera
-		SetCameraUniforms(m_LitTextureShader);
+		//// Camera
+		//SetCameraUniforms(m_LitTextureShader);
 
-		// Lights
-		SetLightingUniforms(m_LitTextureShader);
+		//// Lights
+		//SetLightingUniforms(m_LitTextureShader);
 
-		// Material
-		m_LoglBoxTexture->Bind(0);
-		m_LoglBoxSpecularTexture->Bind(1);
-		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
-		m_LitTextureShader->SetUniform1i("u_Material.specularMap", 1);
-		m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
-		m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 1);
-		m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
+		//// Material
+		//m_LoglBoxTexture->Bind(0);
+		//m_LoglBoxSpecularTexture->Bind(1);
+		//m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
+		//m_LitTextureShader->SetUniform1i("u_Material.specularMap", 1);
+		//m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
+		//m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 1);
+		//m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
 
-		// Geometry
-		m_CubeVao->Bind();
+		//// Geometry
+		//m_CubeVao->Bind();
 
-		{
-			m_LitTextureShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(m_LoglBoxTransform));
-			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
-		}
+		//{
+		//	m_LitTextureShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(m_LoglBoxTransform));
+		//	glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
+		//}
 	}
 
 	void DemoScene::RenderTorches() const
@@ -417,6 +412,65 @@ namespace LGE
 			glm::mat4 headModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.85f, 0.0f));
 			headModel = glm::scale(headModel, glm::vec3(0.12f, 0.12f, 0.12f));
 			m_UnlitColorShader->SetUniformMatrix4f("u_Model", headModel);
+			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
+		}
+	}
+
+	void DemoScene::RenderCampfire(const Campfire& campfire) const
+	{
+		// TODO Use parent campfire
+
+		// --- Woods ---
+		constexpr glm::vec3 woodColor = { 0.32f, 0.18f, 0.07f };
+		constexpr float woodSpecular = 0.05f;
+		constexpr float woodShininess = 4.0f;
+
+		constexpr Transform woods[] = {
+			{ glm::vec3(0.0f,  0.07f,  0.12f), glm::vec3(0.0f,  12.0f, 0.0f), glm::vec3(1.2f, 0.14f, 0.20f) },
+			{ glm::vec3(0.10f, 0.07f, -0.05f), glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(1.2f, 0.14f, 0.20f) },
+			{ glm::vec3(-0.08f, 0.22f,  0.05f), glm::vec3(6.0f,  55.0f, 5.0f), glm::vec3(1.0f, 0.14f, 0.18f) },
+		};
+
+		m_LitColorShader->Bind();
+		SetCameraUniforms(m_LitColorShader);
+		SetLightingUniforms(m_LitColorShader);
+		m_LitColorShader->SetUniform3f("u_Material.color", woodColor.x, woodColor.y, woodColor.z);
+		m_LitColorShader->SetUniform1f("u_Material.specularIntensity", woodSpecular);
+		m_LitColorShader->SetUniform1f("u_Material.shininess", woodShininess);
+
+		m_CubeVao->Bind();
+
+		for (const Transform& wood : woods)
+		{
+			m_LitColorShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(wood));
+			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
+		}
+
+		// --- Embers ---
+		struct Ember { Transform transform; glm::vec3 color; };
+
+		constexpr Ember embers[] = {
+			// Far outer ring
+			{ { glm::vec3(0.55f, 0.04f,  0.30f), glm::vec3(0.0f,  18.0f, 0.0f), glm::vec3(0.32f, 0.07f, 0.08f) }, { 1.0f, 0.30f, 0.0f } }, // deep red orange
+			{ { glm::vec3(-0.50f, 0.04f,  0.40f), glm::vec3(0.0f,  72.0f, 0.0f), glm::vec3(0.30f, 0.07f, 0.08f) }, { 1.0f, 0.40f, 0.0f } }, // orange
+			{ { glm::vec3(0.45f, 0.04f, -0.50f), glm::vec3(0.0f,  48.0f, 0.0f), glm::vec3(0.34f, 0.07f, 0.08f) }, { 1.0f, 0.50f, 0.0f } }, // mid orange
+			{ { glm::vec3(-0.55f, 0.04f, -0.35f), glm::vec3(0.0f, 115.0f, 0.0f), glm::vec3(0.28f, 0.07f, 0.08f) }, { 0.9f, 0.25f, 0.0f } }, // dark ember
+			{ { glm::vec3(-0.25f, 0.04f, -0.55f), glm::vec3(0.0f,  35.0f, 0.0f), glm::vec3(0.30f, 0.07f, 0.07f) }, { 0.95f, 0.28f, 0.0f } }, // dark orange
+			// Mid ring
+			{ { glm::vec3(0.38f, 0.06f, -0.12f), glm::vec3(0.0f,  88.0f, 0.0f), glm::vec3(0.28f, 0.07f, 0.07f) }, { 1.0f, 0.65f, 0.02f } }, // orange yellow
+			{ { glm::vec3(-0.38f, 0.06f,  0.10f), glm::vec3(0.0f, 135.0f, 0.0f), glm::vec3(0.26f, 0.07f, 0.07f) }, { 1.0f, 0.75f, 0.03f } }, // bright orange
+			{ { glm::vec3(0.12f, 0.06f, -0.38f), glm::vec3(0.0f,  22.0f, 0.0f), glm::vec3(0.24f, 0.07f, 0.07f) }, { 1.0f, 0.80f, 0.05f } }, // yellow orange
+			// Core
+			{ { glm::vec3(0.02f, 0.30f,  0.03f), glm::vec3(0.0f,  22.0f, 0.0f), glm::vec3(0.22f, 0.08f, 0.09f) }, { 1.0f, 0.92f, 0.15f } }, // bright yellow
+		};
+
+		m_UnlitColorShader->Bind();
+		m_CubeVao->Bind();
+
+		for (const Ember& ember : embers)
+		{
+			m_UnlitColorShader->SetUniform3f("u_Material.color", ember.color.x, ember.color.y, ember.color.z);
+			m_UnlitColorShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(ember.transform));
 			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 	}
