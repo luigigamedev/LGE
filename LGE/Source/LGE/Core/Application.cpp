@@ -17,7 +17,7 @@ namespace LGE
 		// TODO: Assert there is only one instance of Application
 		s_Instance = this;
 
-		m_Window = new Window(800, 600, "LGE", true);
+		m_Window = new Window(1280, 720, "LGE", false);
 		// TODO: Move graphics context away from window
 		
 		std::cout << "[INFO] [Application] Created" << '\n';

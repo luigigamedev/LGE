@@ -14,6 +14,13 @@ namespace LGE
 	class VertexArray;
 	class VertexBuffer;
 
+	struct Transform 
+	{
+		glm::vec3 Pos;
+		glm::vec3 Rot; // Euler angles in degrees (x=pitch, y=yaw, z=roll)
+		glm::vec3 Scale;
+	};
+
 	struct Camera
 	{
 		glm::vec3 Pos = glm::vec3(0.0f);
@@ -90,6 +97,7 @@ namespace LGE
 		// Logl box (used in learnopengl chapter 2)
 		Texture* m_LoglBoxTexture = nullptr;
 		Texture* m_LoglBoxSpecularTexture = nullptr;
+		Transform m_LoglBoxTransform = { glm::vec3(0.0f), glm::vec3(0.0f, 90.0f, 0.0f) , glm::vec3(1.0f) };
 
 		// Torches
 		std::vector<Torch> m_Torches;
@@ -103,6 +111,7 @@ namespace LGE
 	private:
 		void ReadMouseInput();
 		void ReadAxisInput();
+		glm::mat4 BuildTransformModelMatrix(const Transform& t) const;
 		glm::mat4 BuildCameraViewMatrix() const;
 		void SetLightingUniforms(ShaderProgram* shader) const;
 		void SetCameraUniforms(ShaderProgram* shader) const;

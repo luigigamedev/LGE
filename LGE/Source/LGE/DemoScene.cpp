@@ -113,8 +113,14 @@ namespace LGE
 		if (m_Camera.Pitch < -89.0f)
 			m_Camera.Pitch = -89.0f;
 
+		// Rotations test boxes ----------------------------------------------------------------------------------------
 		constexpr float playerHeight = 1.7f;
 		m_Camera.Pos = m_PlayerPos + glm::vec3(0.0f, playerHeight, 0.0f);
+
+		if (Application::Get().GetKey(GLFW_KEY_UP) == 1)
+			m_LoglBoxTransform.Rot.x += 1.0f;
+		else if (Application::Get().GetKey(GLFW_KEY_DOWN) == 1)
+			m_LoglBoxTransform.Rot.x -= 1.0f;
 
 		// View and projection -----------------------------------------------------------------------------------------
 		m_Camera.ViewMatrix = BuildCameraViewMatrix();
@@ -152,6 +158,25 @@ namespace LGE
 		m_Input.MouseDelta.y = newMouseY - m_Input.Mouse.y;
 		m_Input.Mouse.x = newMouseX;
 		m_Input.Mouse.y = newMouseY;
+	}
+
+	// Rotations follow the right-hand rule: point right thumb along the positive axis,
+	// fingers curl in the positive (CCW) rotation direction.
+	//   +X (pitch): CCW when looking left  (toward -X)
+	//   +Y (yaw):   CCW when looking down  (toward -Y)
+	//   +Z (roll):  CCW when looking back  (toward +Z, opposite of forward)
+	//
+	// glm::rotate post-multiplies, so the last call in code is applied first to vertices.
+	// Rotation order applied to vertices: Y -> X -> Z (yaw -> pitch -> roll)
+	glm::mat4 DemoScene::BuildTransformModelMatrix(const Transform& t) const
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, t.Pos);
+		model = glm::rotate(model, glm::radians(t.Rot.z), WORLD_FORWARD); // roll
+		model = glm::rotate(model, glm::radians(t.Rot.x), WORLD_RIGHT); // pitch
+		model = glm::rotate(model, glm::radians(t.Rot.y), WORLD_UP); // yaw
+		model = glm::scale(model, t.Scale);
+		return model;
 	}
 
 	glm::mat4 DemoScene::BuildCameraViewMatrix() const
@@ -329,15 +354,6 @@ namespace LGE
 
 	void DemoScene::RenderLoglBoxes() const
 	{
-		constexpr glm::vec3 boxesPos[] = {
-			glm::vec3(7.0f, 0.5f,  7.0f),
-			glm::vec3(-7.0f, 0.5f,  7.0f),
-			glm::vec3(7.0f, 0.5f, -7.0f),
-			glm::vec3(-7.0f, 0.5f, -7.0f),
-			glm::vec3(0.0f, 0.5f,  6.0f),
-			glm::vec3(0.0f, 0.5f, -6.0f),
-		};
-
 		constexpr float shininess = 32.0f;
 
 		m_LitTextureShader->Bind();
@@ -360,10 +376,8 @@ namespace LGE
 		// Geometry
 		m_CubeVao->Bind();
 
-		for (auto& pos : boxesPos) 
 		{
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
-			m_LitTextureShader->SetUniformMatrix4f("u_Model", model);
+			m_LitTextureShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(m_LoglBoxTransform));
 			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 	}
