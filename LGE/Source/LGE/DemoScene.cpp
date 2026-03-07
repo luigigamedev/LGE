@@ -226,10 +226,10 @@ namespace LGE
 		shader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
 
 		// TODO: Replace with point lights
-		for (int i = 0; i < m_Torches.size(); i++)
+		int i = 0;
+		char name[64];
+		for (i = 0; i < m_Torches.size(); i++)
 		{
-			char name[64];
-
 			snprintf(name, sizeof(name), "u_PointLights[%d].pos", i);
 			glm::vec3 pos = m_Torches[i].pos + glm::vec3(0.0f, 0.97f, 0.0f);
 			shader->SetUniform3f(name, pos.x, pos.y, pos.z);
@@ -244,7 +244,9 @@ namespace LGE
 			shader->SetUniform1f(name, 0.44f);
 		}
 
-		shader->SetUniform1i("u_PointLightCount", (int)m_Torches.size());
+		SetCampfireLightUniforms(shader, &i);
+
+		shader->SetUniform1i("u_PointLightCount", i);
 	}
 
 	void DemoScene::SetCameraUniforms(ShaderProgram* shader) const
@@ -260,7 +262,7 @@ namespace LGE
 		RenderBoundWalls();
 		RenderLoglBoxes();
 		RenderTorches();
-		RenderCampfire(m_Campfire);
+		RenderCampfire();
 	}
 
 	void DemoScene::RenderGround() const
@@ -416,9 +418,52 @@ namespace LGE
 		}
 	}
 
-	void DemoScene::RenderCampfire(const Campfire& campfire) const
+	void DemoScene::SetCampfireLightUniforms(ShaderProgram* shader, int* i) const
 	{
-		// TODO Use parent campfire
+		glm::mat4 parentMatrix = BuildTransformModelMatrix(m_Campfire.Transform);
+		char name[64];
+		glm::vec3 worldPos;
+
+		// Campfire light A — main, center, warm orange, strongest
+		worldPos = glm::vec3(parentMatrix * glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
+		snprintf(name, sizeof(name), "u_PointLights[%d].pos", *i);
+		shader->SetUniform3f(name, worldPos.x, worldPos.y, worldPos.z);
+		snprintf(name, sizeof(name), "u_PointLights[%d].color", *i);
+		shader->SetUniform3f(name, 1.0f, 0.50f, 0.12f);
+		snprintf(name, sizeof(name), "u_PointLights[%d].linear", *i);
+		shader->SetUniform1f(name, 0.30f);
+		snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", *i);
+		shader->SetUniform1f(name, 0.35f);
+		*i += 1;
+
+		// Campfire light B — secondary, offset right, cooler orange, weaker
+		worldPos = glm::vec3(parentMatrix * glm::vec4(0.2f, 0.35f, 0.1f, 1.0f));
+		snprintf(name, sizeof(name), "u_PointLights[%d].pos", *i);
+		shader->SetUniform3f(name, worldPos.x, worldPos.y, worldPos.z);
+		snprintf(name, sizeof(name), "u_PointLights[%d].color", *i);
+		shader->SetUniform3f(name, 1.0f, 0.38f, 0.05f);
+		snprintf(name, sizeof(name), "u_PointLights[%d].linear", *i);
+		shader->SetUniform1f(name, 0.50f);
+		snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", *i);
+		shader->SetUniform1f(name, 0.60f);
+		*i += 1;
+
+		// Campfire light C — tertiary, offset left, redder, weakest
+		worldPos = glm::vec3(parentMatrix * glm::vec4(-0.15f, 0.30f, -0.1f, 1.0f));
+		snprintf(name, sizeof(name), "u_PointLights[%d].pos", *i);
+		shader->SetUniform3f(name, worldPos.x, worldPos.y, worldPos.z);
+		snprintf(name, sizeof(name), "u_PointLights[%d].color", *i);
+		shader->SetUniform3f(name, 0.9f, 0.25f, 0.04f);
+		snprintf(name, sizeof(name), "u_PointLights[%d].linear", *i);
+		shader->SetUniform1f(name, 0.60f);
+		snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", *i);
+		shader->SetUniform1f(name, 0.80f);
+		*i += 1;
+	}
+
+	void DemoScene::RenderCampfire() const
+	{
+		glm::mat4 parentMatrix = BuildTransformModelMatrix(m_Campfire.Transform);
 
 		// --- Woods ---
 		constexpr glm::vec3 woodColor = { 0.32f, 0.18f, 0.07f };
@@ -442,7 +487,7 @@ namespace LGE
 
 		for (const Transform& wood : woods)
 		{
-			m_LitColorShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(wood));
+			m_LitColorShader->SetUniformMatrix4f("u_Model", parentMatrix * BuildTransformModelMatrix(wood));
 			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 
@@ -458,10 +503,9 @@ namespace LGE
 			{ { glm::vec3(-0.25f, 0.04f, -0.55f), glm::vec3(0.0f,  35.0f, 0.0f), glm::vec3(0.30f, 0.07f, 0.07f) }, { 0.95f, 0.28f, 0.0f } }, // dark orange
 			// Mid ring
 			{ { glm::vec3(0.38f, 0.06f, -0.12f), glm::vec3(0.0f,  88.0f, 0.0f), glm::vec3(0.28f, 0.07f, 0.07f) }, { 1.0f, 0.65f, 0.02f } }, // orange yellow
-			{ { glm::vec3(-0.38f, 0.06f,  0.10f), glm::vec3(0.0f, 135.0f, 0.0f), glm::vec3(0.26f, 0.07f, 0.07f) }, { 1.0f, 0.75f, 0.03f } }, // bright orange
-			{ { glm::vec3(0.12f, 0.06f, -0.38f), glm::vec3(0.0f,  22.0f, 0.0f), glm::vec3(0.24f, 0.07f, 0.07f) }, { 1.0f, 0.80f, 0.05f } }, // yellow orange
+			{ { glm::vec3(-0.15f, 0.06f,  0.35f), glm::vec3(0.0f, 135.0f, 0.0f), glm::vec3(0.26f, 0.07f, 0.07f) }, { 1.0f, 0.75f, 0.03f } }, // bright orange
 			// Core
-			{ { glm::vec3(0.02f, 0.30f,  0.03f), glm::vec3(0.0f,  22.0f, 0.0f), glm::vec3(0.22f, 0.08f, 0.09f) }, { 1.0f, 0.92f, 0.15f } }, // bright yellow
+			{ { glm::vec3(0.02f, 0.35f,  0.03f), glm::vec3(0.0f,  22.0f, 0.0f), glm::vec3(0.22f, 0.08f, 0.09f) }, { 1.0f, 0.92f, 0.15f } }, // bright yellow
 		};
 
 		m_UnlitColorShader->Bind();
@@ -470,7 +514,7 @@ namespace LGE
 		for (const Ember& ember : embers)
 		{
 			m_UnlitColorShader->SetUniform3f("u_Material.color", ember.color.x, ember.color.y, ember.color.z);
-			m_UnlitColorShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(ember.transform));
+			m_UnlitColorShader->SetUniformMatrix4f("u_Model", parentMatrix * BuildTransformModelMatrix(ember.transform));
 			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 	}

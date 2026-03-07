@@ -85,11 +85,11 @@ namespace LGE
 		Input m_Input;
 
 		// Ambient
-		glm::vec3 m_AmbientColor = glm::vec3(0.02f, 0.02f, 0.03f); // nearly black, just enough to see shapes
+		glm::vec3 m_AmbientColor = glm::vec3(0.01f, 0.01f, 0.015f); // darker, almost nothing
 
 		// Directional light
 		glm::vec3 m_DirectionalLightDir = glm::vec3(-0.5f, -0.4f, -0.3f);
-		glm::vec3 m_DirectionalLightColor = glm::vec3(0.3f, 0.32f, 0.38f); // dim cold blue-white
+		glm::vec3 m_DirectionalLightColor = glm::vec3(0.06f, 0.07f, 0.09f); // nearly off, just a cold hint
 
 		// Ground
 		float m_GroundScale = 32.0f;
@@ -111,7 +111,7 @@ namespace LGE
 		glm::vec3 m_TorchPurpleColor = glm::vec3(0.7f, 0.2f, 1.0f);  // arcane
 
 		// Campfire
-		Campfire m_Campfire;
+		Campfire m_Campfire = { { glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f), glm::vec3(1.0f) } };
 	public:
 		virtual void Update(const float deltaTime) override;
 		virtual void Render() override;
@@ -126,6 +126,8 @@ namespace LGE
 		void RenderBoundWalls() const;
 		void RenderLoglBoxes() const;
 		void RenderTorches() const;
-		void RenderCampfire(const Campfire& campfire) const;
+
+		void SetCampfireLightUniforms(ShaderProgram* shader, int* i) const;
+		void RenderCampfire() const;
 	};
 }
