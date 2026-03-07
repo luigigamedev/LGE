@@ -351,32 +351,99 @@ namespace LGE
 
 	void DemoScene::RenderLoglBoxes() const
 	{
-		//constexpr float shininess = 32.0f;
+		constexpr float shininess = 32.0f;
 
-		//m_LitTextureShader->Bind();
+		constexpr Transform transforms[] = {
+			// --- Entry corridor (lining the path from spawn toward campfire) ---
+			// Left side
+			{ glm::vec3(-2.0f, 0.5f,  6.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-2.0f, 0.5f,  4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-2.0f, 0.5f,  2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-2.0f, 0.5f,  0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Right side
+			{ glm::vec3(2.0f, 0.5f,  6.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(2.0f, 0.5f,  4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(2.0f, 0.5f,  2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(2.0f, 0.5f,  0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
 
-		//// Camera
-		//SetCameraUniforms(m_LitTextureShader);
+			// --- North-west ruined arch ---
+			// Left pillar
+			{ glm::vec3(-9.0f, 0.5f, -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-9.0f, 1.5f, -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Right pillar
+			{ glm::vec3(-7.0f, 0.5f, -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-7.0f, 1.5f, -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Lintel across the top
+			{ glm::vec3(-8.0f, 2.5f, -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Rubble scattered around base of arch
+			{ glm::vec3(-10.0f, 0.5f, -7.5f), glm::vec3(0.0f, 20.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-6.0f, 0.5f, -8.5f), glm::vec3(0.0f,-15.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-9.5f, 0.5f,-10.0f), glm::vec3(0.0f, 35.0f, 0.0f), glm::vec3(1.0f) },
 
-		//// Lights
-		//SetLightingUniforms(m_LitTextureShader);
+			// --- North-east watchtower platform ---
+			// Four corner pillars
+			{ glm::vec3(10.0f, 0.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(10.0f, 1.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 0.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 1.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(10.0f, 0.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(10.0f, 1.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 0.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 1.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Platform top — open flat surface on top of pillars
+			{ glm::vec3(10.0f, 2.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(11.0f, 2.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 2.5f,  -8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(10.0f, 2.5f,  -9.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(11.0f, 2.5f,  -9.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 2.5f,  -9.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(10.0f, 2.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(11.0f, 2.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 2.5f, -10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Rubble at base
+			{ glm::vec3(9.0f, 0.5f,  -7.5f), glm::vec3(0.0f, 25.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(13.0f, 0.5f,  -9.0f), glm::vec3(0.0f,-20.0f, 0.0f), glm::vec3(1.0f) },
 
-		//// Material
-		//m_LoglBoxTexture->Bind(0);
-		//m_LoglBoxSpecularTexture->Bind(1);
-		//m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
-		//m_LitTextureShader->SetUniform1i("u_Material.specularMap", 1);
-		//m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
-		//m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 1);
-		//m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
+			// --- South-east staircase pyramid ---
+			// Base layer 3x1
+			{ glm::vec3(10.0f, 0.5f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(11.0f, 0.5f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(12.0f, 0.5f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Mid layer 2x1
+			{ glm::vec3(10.0f, 1.5f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(11.0f, 1.5f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
+			// Top layer 1x1
+			{ glm::vec3(10.0f, 2.5f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f) },
 
-		//// Geometry
-		//m_CubeVao->Bind();
+			// --- South-west lone pillar with collapsed top ---
+			{ glm::vec3(-10.0f, 0.5f, 4.0f), glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-10.0f, 1.5f, 4.0f), glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-10.0f, 2.5f, 4.0f), glm::vec3(0.0f,  0.0f, 0.0f), glm::vec3(1.0f) },
+			// Collapsed block leaning off to the side
+			{ glm::vec3(-9.0f, 0.5f, 4.5f), glm::vec3(0.0f, 30.0f, 0.0f), glm::vec3(1.0f) },
+			{ glm::vec3(-11.0f, 0.5f, 3.5f), glm::vec3(0.0f,-25.0f, 0.0f), glm::vec3(1.0f) },
+		};
 
-		//{
-		//	m_LitTextureShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(m_LoglBoxTransform));
-		//	glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
-		//}
+		m_LitTextureShader->Bind();
+
+		SetCameraUniforms(m_LitTextureShader);
+		SetLightingUniforms(m_LitTextureShader);
+
+		m_LoglBoxTexture->Bind(0);
+		m_LoglBoxSpecularTexture->Bind(1);
+		m_LitTextureShader->SetUniform1i("u_Material.diffuseMap", 0);
+		m_LitTextureShader->SetUniform1i("u_Material.specularMap", 1);
+		m_LitTextureShader->SetUniform2f("u_Tiling", 1.0f, 1.0f);
+		m_LitTextureShader->SetUniform1i("u_Material.useSpecularMap", 1);
+		m_LitTextureShader->SetUniform1f("u_Material.shininess", shininess);
+
+		m_CubeVao->Bind();
+
+		for (const Transform& t : transforms)
+		{
+			m_LitTextureShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(t));
+			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
+		}
 	}
 
 	void DemoScene::RenderTorches() const

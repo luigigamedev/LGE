@@ -75,7 +75,7 @@ namespace LGE
 		ShaderProgram* m_UnlitColorShader = nullptr;
 
 		// Player
-		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 5.0f); // Origin at the bottom (ground)
+		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 10.0f); // Origin at the bottom (ground)
 		float m_PlayerYaw = -90.0f; // TODO: initialize from forward; glm::vec3 Forward = glm::vec3(0.0f, 0.0f, -1.0f);
 
 		// Camera
