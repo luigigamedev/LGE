@@ -44,10 +44,18 @@ namespace LGE
 		glm::vec2 Axis = glm::vec2(0.0f); // x: horizontal, y: vertical
 	};
 
-	struct Torch 
+	struct Torch
 	{
-		glm::vec3 pos = glm::vec3(0.0f);
-		glm::vec3 color = glm::vec3(1.0f);
+		struct Colors
+		{
+			static constexpr glm::vec3 White = { 1.0f, 0.95f, 0.85f }; // bright beacon
+			static constexpr glm::vec3 Cold = { 0.3f, 0.6f,  1.0f }; // cold magic
+			static constexpr glm::vec3 Nature = { 0.2f, 1.0f,  0.3f }; // poison/nature
+			static constexpr glm::vec3 Arcane = { 0.7f, 0.2f,  1.0f }; // arcane
+		};
+
+		Transform Transform;
+		glm::vec3 Color;
 	};
 
 	struct Campfire
@@ -75,7 +83,7 @@ namespace LGE
 		ShaderProgram* m_UnlitColorShader = nullptr;
 
 		// Player
-		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 10.0f); // Origin at the bottom (ground)
+		glm::vec3 m_PlayerPos = glm::vec3(0.0f, 0.0f, 8.0f); // Origin at the bottom (ground)
 		float m_PlayerYaw = -90.0f; // TODO: initialize from forward; glm::vec3 Forward = glm::vec3(0.0f, 0.0f, -1.0f);
 
 		// Camera
@@ -105,10 +113,6 @@ namespace LGE
 
 		// Torches
 		std::vector<Torch> m_Torches;
-		glm::vec3 m_TorchOrangeColor = glm::vec3(1.0f, 0.55f, 0.1f);  // fire
-		glm::vec3 m_TorchBlueColor = glm::vec3(0.3f, 0.6f, 1.0f);  // cold magic
-		glm::vec3 m_TorchGreenColor = glm::vec3(0.2f, 1.0f, 0.3f);  // poison/nature
-		glm::vec3 m_TorchPurpleColor = glm::vec3(0.7f, 0.2f, 1.0f);  // arcane
 
 		// Campfire
 		Campfire m_Campfire = { { glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f), glm::vec3(1.0f) } };
@@ -122,9 +126,14 @@ namespace LGE
 		glm::mat4 BuildCameraViewMatrix() const;
 		void SetLightingUniforms(ShaderProgram* shader) const;
 		void SetCameraUniforms(ShaderProgram* shader) const;
+		
 		void RenderGround() const;
+		
 		void RenderBoundWalls() const;
+		
 		void RenderLoglBoxes() const;
+
+		void SetTorchesLightUniforms(ShaderProgram* shader, int* i) const;
 		void RenderTorches() const;
 
 		void SetCampfireLightUniforms(ShaderProgram* shader, int* i) const;

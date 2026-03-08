@@ -53,14 +53,24 @@ namespace LGE
 		m_LoglBoxSpecularTexture = new Texture("Resources/Textures/LearnOpenGL/container2_specular.png", false);
 
 		m_Torches.reserve(8);
-		m_Torches.push_back({ glm::vec3(8.0f, 0.0f,  8.0f), m_TorchOrangeColor });
-		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f,  8.0f), m_TorchBlueColor });
-		m_Torches.push_back({ glm::vec3(8.0f, 0.0f, -8.0f), m_TorchGreenColor });
-		m_Torches.push_back({ glm::vec3(-8.0f, 0.0f, -8.0f), m_TorchPurpleColor });
-		m_Torches.push_back({ glm::vec3(0.0f, 0.0f,  14.5f), m_TorchOrangeColor });
-		m_Torches.push_back({ glm::vec3(0.0f, 0.0f, -14.5f), m_TorchBlueColor });
-		m_Torches.push_back({ glm::vec3(14.5f, 0.0f, 0.0f),  m_TorchGreenColor });
-		m_Torches.push_back({ glm::vec3(-14.5f, 0.0f, 0.0f),  m_TorchPurpleColor });
+
+		// Entry corridor — cold blue, wall mounted leaning inward toward path
+		// Left boxes inner face (+X), lean left
+		m_Torches.push_back({ { glm::vec3(-1.45f, 0.5f, 6.0f), glm::vec3(0.0f, 0.0f,  22.0f), glm::vec3(1.0f) }, Torch::Colors::Cold });
+		m_Torches.push_back({ { glm::vec3(-1.45f, 0.5f, 2.0f), glm::vec3(0.0f, 0.0f,  22.0f), glm::vec3(1.0f) }, Torch::Colors::Cold });
+		// Right boxes inner face (-X), lean right
+		m_Torches.push_back({ { glm::vec3(1.45f, 0.5f, 6.0f), glm::vec3(0.0f, 0.0f, -22.0f), glm::vec3(1.0f) }, Torch::Colors::Cold });
+		m_Torches.push_back({ { glm::vec3(1.45f, 0.5f, 2.0f), glm::vec3(0.0f, 0.0f, -22.0f), glm::vec3(1.0f) }, Torch::Colors::Cold });
+
+		// Arch pillars — arcane, wall mounted on south face, leaning toward player
+		m_Torches.push_back({ { glm::vec3(-9.0f, 0.5f, -7.45f), glm::vec3(22.0f, 0.0f, 0.0f), glm::vec3(1.0f) }, Torch::Colors::Arcane });
+		m_Torches.push_back({ { glm::vec3(-7.0f, 0.5f, -7.45f), glm::vec3(22.0f, 0.0f, 0.0f), glm::vec3(1.0f) }, Torch::Colors::Arcane });
+
+		// Pyramid — nature, wall mounted on south face
+		m_Torches.push_back({ { glm::vec3(10.0f, 0.5f, 4.45f), glm::vec3(22.0f, 0.0f, 0.0f), glm::vec3(1.0f) }, Torch::Colors::Nature });
+
+		// Lone pillar south-west — white, wall mounted on south face
+		m_Torches.push_back({ { glm::vec3(-10.0f, 0.5f, 4.45f), glm::vec3(22.0f, 0.0f, 0.0f), glm::vec3(1.0f) }, Torch::Colors::White });
 	}
 
 	DemoScene::~DemoScene()
@@ -225,24 +235,9 @@ namespace LGE
 		shader->SetUniform3f("u_DirectionalLight.dir", m_DirectionalLightDir.x, m_DirectionalLightDir.y, m_DirectionalLightDir.z);
 		shader->SetUniform3f("u_DirectionalLight.color", m_DirectionalLightColor.x, m_DirectionalLightColor.y, m_DirectionalLightColor.z);
 
-		// TODO: Replace with point lights
 		int i = 0;
-		char name[64];
-		for (i = 0; i < m_Torches.size(); i++)
-		{
-			snprintf(name, sizeof(name), "u_PointLights[%d].pos", i);
-			glm::vec3 pos = m_Torches[i].pos + glm::vec3(0.0f, 0.97f, 0.0f);
-			shader->SetUniform3f(name, pos.x, pos.y, pos.z);
-
-			snprintf(name, sizeof(name), "u_PointLights[%d].color", i);
-			shader->SetUniform3f(name, m_Torches[i].color.x, m_Torches[i].color.y, m_Torches[i].color.z);
-
-			snprintf(name, sizeof(name), "u_PointLights[%d].linear", i);
-			shader->SetUniform1f(name, 0.35f);
-
-			snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", i);
-			shader->SetUniform1f(name, 0.44f);
-		}
+		
+		SetTorchesLightUniforms(shader, &i);
 
 		SetCampfireLightUniforms(shader, &i);
 
@@ -446,6 +441,29 @@ namespace LGE
 		}
 	}
 
+	void DemoScene::SetTorchesLightUniforms(ShaderProgram* shader, int* i) const
+	{
+		char name[64];
+
+		for (const auto& torch : m_Torches)
+		{
+			glm::mat4 parentMatrix = BuildTransformModelMatrix(torch.Transform);
+
+			glm::vec3 worldPos;
+			worldPos = glm::vec3(parentMatrix * glm::vec4(0.0f, 0.97f, 0.0f, 1.0f));
+
+			snprintf(name, sizeof(name), "u_PointLights[%d].pos", *i);
+			shader->SetUniform3f(name, worldPos.x, worldPos.y, worldPos.z);
+			snprintf(name, sizeof(name), "u_PointLights[%d].color", *i);
+			shader->SetUniform3f(name, torch.Color.x, torch.Color.y, torch.Color.z);
+			snprintf(name, sizeof(name), "u_PointLights[%d].linear", *i);
+			shader->SetUniform1f(name, 0.35f);
+			snprintf(name, sizeof(name), "u_PointLights[%d].quadratic", *i);
+			shader->SetUniform1f(name, 0.44f);
+			*i += 1;
+		}
+	}
+
 	void DemoScene::RenderTorches() const
 	{
 		// Sticks
@@ -457,14 +475,14 @@ namespace LGE
 
 		m_CubeVao->Bind();
 
+		const glm::mat4 stickLocal = BuildTransformModelMatrix({ glm::vec3(0.0f, 0.4f, 0.0f), glm::vec3(0.0f), glm::vec3(0.08f, 0.8f, 0.08f) });
+
 		for (const Torch& torch : m_Torches)
 		{
-			glm::mat4 stickModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.4f, 0.0f));
-			stickModel = glm::scale(stickModel, glm::vec3(0.08f, 0.8f, 0.08f));
 			m_LitColorShader->SetUniform3f("u_Material.color", 0.45f, 0.3f, 0.15f);
 			m_LitColorShader->SetUniform1f("u_Material.specularIntensity", 0.1f);
 			m_LitColorShader->SetUniform1f("u_Material.shininess", 8.0f);
-			m_LitColorShader->SetUniformMatrix4f("u_Model", stickModel);
+			m_LitColorShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(torch.Transform) * stickLocal);
 			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 
@@ -475,12 +493,12 @@ namespace LGE
 
 		m_CubeVao->Bind();
 
+		const glm::mat4 headLocal = BuildTransformModelMatrix({ glm::vec3(0.0f, 0.85f, 0.0f), glm::vec3(0.0f), glm::vec3(0.12f) });
+
 		for (const Torch& torch : m_Torches)
 		{
-			m_UnlitColorShader->SetUniform3f("u_Material.color", torch.color.x, torch.color.y, torch.color.z);
-			glm::mat4 headModel = glm::translate(glm::mat4(1.0f), torch.pos + glm::vec3(0.0f, 0.85f, 0.0f));
-			headModel = glm::scale(headModel, glm::vec3(0.12f, 0.12f, 0.12f));
-			m_UnlitColorShader->SetUniformMatrix4f("u_Model", headModel);
+			m_UnlitColorShader->SetUniform3f("u_Material.color", torch.Color.x, torch.Color.y, torch.Color.z);
+			m_UnlitColorShader->SetUniformMatrix4f("u_Model", BuildTransformModelMatrix(torch.Transform) * headLocal);
 			glDrawElements(GL_TRIANGLES, m_CubeIb->GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 	}
